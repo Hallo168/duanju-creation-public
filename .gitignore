@@ -1,0 +1,45 @@
+# Binaries and installers (not creative source assets)
+*.exe
+*.apk
+
+# Rendered videos are kept locally, not in GitHub backup
+*.mp4
+*.mov
+*.avi
+*.mkv
+*.webm
+*.flv
+*.m4v
+
+# Backup helper state
+.git-backup-*
+
+# Python cache
+__pycache__/
+*.py[cod]
+
+# Runtime garbage
+*.log
+*.err.log
+工具/运行垃圾/logs/*
+工具/运行垃圾/tasks/*
+工具/运行垃圾/tmp/*
+!工具/运行垃圾/README.md
+!工具/运行垃圾/.gitkeep
+!工具/运行垃圾/logs/.gitkeep
+!工具/运行垃圾/tasks/.gitkeep
+!工具/运行垃圾/tmp/.gitkeep
+
+# Claude Code internal
+.claude/launch.json
+# Generated story workspaces and assets stay local
+/stories/
+
+# Public snapshot runtime protection
+.env*
+*.log
+*.err
+**/data/
+**/cache/
+**/tmp/
+**/__pycache__/

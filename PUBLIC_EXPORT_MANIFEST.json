@@ -1,0 +1,43 @@
+{
+  "kind": "sanitized-public-project-snapshot",
+  "selected_text_files": 3842,
+  "selected_utf8_bytes": 41996532,
+  "selected_by_top_level": {
+    ".gitignore": 1,
+    "usage.md": 1,
+    "开放API对接文档.md": 1,
+    "方案.md": 1,
+    "洗稿提示词.md": 1,
+    "爆款结构库.md": 1,
+    "规则变更日志.md": 1,
+    "跨层契约.md": 1,
+    "Google下载": 11,
+    "knowledge": 15,
+    "外部依赖": 3069,
+    "对标原稿": 44,
+    "工具": 57,
+    "归档": 24,
+    "洗稿成品": 29,
+    "爆款结构库": 41,
+    "独立短视频": 4,
+    "蒸馏项目": 8,
+    "评审": 10,
+    "配乐库": 2,
+    "金标准样例": 15,
+    "产品图": 12,
+    "stories": 511,
+    "books": 5
+  },
+  "excluded_categories": {
+    "sensitive_or_log_file": 15,
+    "non_text_file": 19,
+    "binary_or_generated_media": 4827,
+    "ignored_directory": 24359,
+    "blocked_runtime_path": 3575,
+    "sensitive_filename_or_account_dir": 10,
+    "source_export_generation": 1
+  },
+  "excluded_prefixes": [
+    "Google下载"
+  ]
+}

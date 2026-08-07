@@ -1,0 +1,13 @@
+.venv/
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*.license
+*.private.pem
+issuer-backup*
+build-product/
+dist-product/
+downloads/
+tmp/
+*.tmp
+*.tmp.err

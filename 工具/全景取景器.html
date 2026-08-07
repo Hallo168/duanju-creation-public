@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<title>全景取景器 · 虚拟影棚 v2</title>
+<style>
+  html,body{margin:0;height:100%;background:#111;color:#ddd;font:14px/1.6 "Microsoft YaHei",sans-serif;overflow:hidden}
+  #bar{position:fixed;top:0;left:0;right:0;display:flex;gap:8px;align-items:center;padding:8px 12px;background:rgba(20,20,20,.92);z-index:10;flex-wrap:wrap}
+  #bar button,#bar label.btn{background:#2d6cdf;color:#fff;border:0;border-radius:6px;padding:6px 12px;cursor:pointer;font-size:14px}
+  #bar button.gray{background:#444}
+  #bar button.green{background:#1f9d55}
+  #readout{margin-left:auto;font-variant-numeric:tabular-nums;color:#9fd}
+  #stage{position:absolute;inset:0;display:flex;align-items:center;justify-content:center}
+  canvas{background:#000;box-shadow:0 0 30px rgba(0,0,0,.8)}
+  #hint{position:fixed;bottom:12px;left:0;right:0;text-align:center;color:#888;pointer-events:none}
+  #drop{position:fixed;inset:0;display:flex;flex-direction:column;gap:10px;align-items:center;justify-content:center;font-size:18px;color:#888;pointer-events:none;text-align:center}
+  #err{position:fixed;top:52px;left:0;right:0;background:#a22;color:#fff;padding:10px 16px;display:none;z-index:20;white-space:pre-wrap}
+  input[type=file]{display:none}
+</style>
+</head>
+<body>
+<div id="bar">
+  <label class="btn">打开全景图<input type="file" id="file" accept="image/*"></label>
+  <button class="gray" data-ar="fill">铺满</button>
+  <button class="gray" data-ar="916">竖屏 9:16</button>
+  <button class="gray" data-ar="169">横屏 16:9</button>
+  <button id="shot">📸 截当前机位</button>
+  <button id="auto" class="green">🧭 自动四宫格（前右后左）</button>
+  <span id="readout">朝向 0° ｜ 俯仰 0° ｜ 视场 70°</span>
+</div>
+<div id="err"></div>
+<div id="stage"><canvas id="cv"></canvas></div>
+<div id="drop">
+  <div>把全景图拖进来，或点左上角"打开全景图"</div>
+  <div style="font-size:14px;color:#666">按钮点了没反应？请用 Edge 或 Chrome 打开本文件（右键 → 打开方式），不要用 IE</div>
+</div>
+<div id="hint">拖动＝环视 ｜ 滚轮＝变焦 ｜ 自动四宫格＝转四个方向各拍一张拼成 2×2 场景图直接下载</div>
+<script>
+function showErr(msg){var e=document.getElementById('err');e.textContent='工具出错：'+msg;e.style.display='block';}
+window.onerror=function(m){showErr(m);return false;};
+
+var cv=document.getElementById('cv');
+var gl=cv.getContext('webgl',{preserveDrawingBuffer:true})||cv.getContext('experimental-webgl',{preserveDrawingBuffer:true});
+if(!gl){showErr('浏览器没有开启 WebGL（显卡硬件加速被禁用，或浏览器太旧）。请用新版 Edge/Chrome，并在浏览器设置里开启"硬件加速"。');}
+
+var VS='attribute vec2 p;void main(){gl_Position=vec4(p,0.,1.);}';
+var FS='precision highp float;uniform sampler2D t;uniform float yaw,pitch,fov,asp;uniform vec2 res;'+
+'void main(){'+
+'vec2 ndc=(gl_FragCoord.xy/res)*2.-1.;'+
+'float th=tan(fov*0.5);'+
+'vec3 d=normalize(vec3(ndc.x*th*asp, ndc.y*th, -1.0));'+
+'float cp=cos(pitch),sp=sin(pitch);'+
+'d=vec3(d.x, d.y*cp - d.z*sp, d.y*sp + d.z*cp);'+
+'float cy=cos(yaw),sy=sin(yaw);'+
+'d=vec3(d.x*cy + d.z*sy, d.y, -d.x*sy + d.z*cy);'+
+'float u=0.5 + atan(d.x, -d.z)/6.2831853;'+
+'float v=0.5 - asin(clamp(d.y,-1.,1.))/3.1415926;'+
+'gl_FragColor=texture2D(t, vec2(u,v));}';
+
+function mkShader(type,src){
+  var s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);
+  if(!gl.getShaderParameter(s,gl.COMPILE_STATUS)){showErr('着色器编译失败：'+gl.getShaderInfoLog(s));}
+  return s;
+}
+var pr,locP,tex,hasImg=false;
+var yaw=0,pitch=0,fov=70,mode='916';
+if(gl){
+  pr=gl.createProgram();
+  gl.attachShader(pr,mkShader(gl.VERTEX_SHADER,VS));
+  gl.attachShader(pr,mkShader(gl.FRAGMENT_SHADER,FS));
+  gl.linkProgram(pr);
+  if(!gl.getProgramParameter(pr,gl.LINK_STATUS)){showErr('着色器链接失败：'+gl.getProgramInfoLog(pr));}
+  gl.useProgram(pr);
+  var buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  locP=gl.getAttribLocation(pr,'p');gl.enableVertexAttribArray(locP);
+  gl.vertexAttribPointer(locP,2,gl.FLOAT,false,0,0);
+  tex=gl.createTexture();
+}
+function U(n){return gl.getUniformLocation(pr,n);}
+
+function setImg(img){
+  // 重采样到 2 的幂次尺寸（2048x1024）——WebGL1 的非幂次纹理配 REPEAT 会黑屏
+  var pot=document.createElement('canvas');pot.width=2048;pot.height=1024;
+  pot.getContext('2d').drawImage(img,0,0,2048,1024);
+  gl.bindTexture(gl.TEXTURE_2D,tex);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL,false); // 不翻转：图片顶行=天花板，对应 v=0
+  gl.texImage2D(gl.TEXTURE_2D,0,gl.RGBA,gl.RGBA,gl.UNSIGNED_BYTE,pot);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_S,gl.REPEAT);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_WRAP_T,gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MIN_FILTER,gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D,gl.TEXTURE_MAG_FILTER,gl.LINEAR);
+  hasImg=true;document.getElementById('drop').style.display='none';draw();
+}
+function loadFile(f){
+  var img=new Image();
+  img.onload=function(){setImg(img);};
+  img.onerror=function(){showErr('图片加载失败，请确认是 png/jpg 文件');};
+  img.src=URL.createObjectURL(f);
+}
+window.loadFromUrl=function(url){ // 供自动化测试/脚本调用
+  var img=new Image();img.crossOrigin='anonymous';
+  img.onload=function(){setImg(img);};img.src=url;
+};
+document.getElementById('file').addEventListener('change',function(e){
+  if(e.target.files[0])loadFile(e.target.files[0]);
+});
+window.addEventListener('dragover',function(e){e.preventDefault();});
+window.addEventListener('drop',function(e){e.preventDefault();if(e.dataTransfer.files[0])loadFile(e.dataTransfer.files[0]);});
+
+function resize(){
+  var W=window.innerWidth,H=window.innerHeight-52,w,h;
+  if(mode==='fill'){w=W;h=H;}
+  else if(mode==='916'){h=Math.floor(H*0.96);w=Math.floor(h*9/16);if(w>W){w=W;h=Math.floor(w*16/9);}}
+  else{w=Math.floor(W*0.96);h=Math.floor(w*9/16);if(h>H){h=H;w=Math.floor(h*16/9);}}
+  var dpr=window.devicePixelRatio||1;
+  cv.width=Math.floor(w*dpr);cv.height=Math.floor(h*dpr);
+  cv.style.width=w+'px';cv.style.height=h+'px';
+  if(gl)draw();
+}
+var btns=document.querySelectorAll('#bar button[data-ar]');
+for(var i=0;i<btns.length;i++){(function(b){b.addEventListener('click',function(){mode=b.getAttribute('data-ar');resize();});})(btns[i]);}
+window.addEventListener('resize',resize);
+
+function renderView(_yaw,_pitch,_fovDeg){
+  gl.viewport(0,0,cv.width,cv.height);
+  gl.uniform1f(U('yaw'),_yaw*Math.PI/180);
+  gl.uniform1f(U('pitch'),_pitch*Math.PI/180);
+  gl.uniform1f(U('fov'),_fovDeg*Math.PI/180);
+  gl.uniform1f(U('asp'),cv.width/cv.height);
+  gl.uniform2f(U('res'),cv.width,cv.height);
+  gl.drawArrays(gl.TRIANGLE_STRIP,0,4);
+}
+function draw(){
+  renderView(yaw,pitch,fov);
+  var y=((yaw%360)+360)%360;
+  document.getElementById('readout').textContent=
+    '朝向 '+Math.round(y)+'° ｜ 俯仰 '+Math.round(pitch)+'° ｜ 视场 '+Math.round(fov)+'°';
+}
+
+var dragging=false,lx=0,ly=0;
+cv.addEventListener('mousedown',function(e){dragging=true;lx=e.clientX;ly=e.clientY;});
+window.addEventListener('mouseup',function(){dragging=false;});
+window.addEventListener('mousemove',function(e){
+  if(!dragging||!hasImg)return;
+  yaw-=(e.clientX-lx)*0.12*(fov/70);
+  pitch=Math.max(-85,Math.min(85,pitch+(e.clientY-ly)*0.12*(fov/70)));
+  lx=e.clientX;ly=e.clientY;draw();
+});
+window.addEventListener('wheel',function(e){
+  if(!hasImg)return;
+  fov=Math.max(28,Math.min(110,fov+(e.deltaY>0?4:-4)));draw();
+});
+
+document.getElementById('shot').addEventListener('click',function(){
+  if(!hasImg){alert('先打开一张全景图');return;}
+  draw();
+  cv.toBlob(function(b){
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(b);
+    var y=Math.round(((yaw%360)+360)%360);
+    a.download='机位_朝向'+y+'_俯仰'+Math.round(pitch)+'_视场'+Math.round(fov)+'.png';
+    a.click();
+  },'image/png');
+});
+
+// ===== 自动四宫格：前(0°)右(90°)后(180°)左(270°)各拍一张，拼 2x2 直接当场景图 =====
+document.getElementById('auto').addEventListener('click',function(){
+  if(!hasImg){alert('先打开一张全景图');return;}
+  var cellW=960,cellH=540;          // 每格 16:9
+  var hFov=100;                      // 每格水平视场100°，四格覆盖360°有重叠
+  var vFov=2*Math.atan(Math.tan(hFov*Math.PI/360)*cellH/cellW)*180/Math.PI;
+  var saveW=cv.width,saveH=cv.height,saveStyleW=cv.style.width,saveStyleH=cv.style.height;
+  cv.width=cellW;cv.height=cellH;
+  var grid=document.createElement('canvas');
+  grid.width=cellW*2+6;grid.height=cellH*2+6;      // 6px 白色分隔线
+  var ctx=grid.getContext('2d');
+  ctx.fillStyle='#ffffff';ctx.fillRect(0,0,grid.width,grid.height);
+  var dirs=[0,90,180,270];
+  var pos=[[0,0],[cellW+6,0],[0,cellH+6],[cellW+6,cellH+6]];
+  for(var i=0;i<4;i++){
+    renderView(yaw+dirs[i],pitch,vFov);   // 以当前朝向为"前"
+    ctx.drawImage(cv,pos[i][0],pos[i][1]);
+  }
+  cv.width=saveW;cv.height=saveH;cv.style.width=saveStyleW;cv.style.height=saveStyleH;
+  draw();
+  grid.toBlob(function(b){
+    var a=document.createElement('a');
+    a.href=URL.createObjectURL(b);
+    var y=Math.round(((yaw%360)+360)%360);
+    a.download='场景四宫格_基准朝向'+y+'_俯仰'+Math.round(pitch)+'.png';
+    a.click();
+  },'image/png');
+});
+
+resize();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+{
+  "_说明": "TikTok Symphony 视频通道的本机路径与端口。换机器只改这个文件，代理与执行器都从这里取值（launch.py 负责加载并注入环境变量）。",
+  "监听端口": 8765,
+  "_监听端口_说明": "代理只绑 127.0.0.1，不监听局域网。改这里之后必须同步改 工具/api配置.json 里 providers.symphony_video.base_url 的端口；launch.py 启动时会自动比对并告警。",
+  "node": "node",
+  "_node_说明": "Node.js 可执行文件。走 PATH 就填 \"node\"，否则填绝对路径。只有需要浏览器兜底时才用到。",
+  "OpenCLI入口": "外部依赖/OpenCLI-Symphony/dist/src/main.js",
+  "_OpenCLI入口_说明": "浏览器适配器入口。2026-08-02 起源码收编进本项目 外部依赖/OpenCLI-Symphony（唯一维护版，F:\\OpenCLI-Symphony 原件停用；上游=第三方开源 @jackwener/opencli，Apache-2.0），node_modules 不入 git、新机器按 外部依赖/README.md 补装。三件事必须靠它：①首次登录授权 ②新参考图首次上传登记 ③网页账号切换兜底。提交/轮询/下载在参考图已登记后全走直连，不需要它。这个项目没了就只剩纯直连能力。",
+  "ffprobe": "ffprobe",
+  "_ffprobe_说明": "下载后核验成片分辨率用（低清转码流是合法 mp4、时长也对，肉眼看不出来）。填 \"ffprobe\" 走 PATH 也行。",
+  "默认主账号": null,
+  "_默认主账号_说明": "主账号别名同时绑定独立直连会话与 OpenCLI Profile。当前可用 main-b（10 个子账号）与 main-a（5 个子账号：main-a~main-e）。命令行 --main-account 覆盖成另一个；整集大批量用 --main-accounts all 一次摊到全部主账号，此时本字段不生效。",
+  "停用主账号": [],
+  "_停用主账号_说明": "封号/停用的主账号名单。提交、热预存、轮询全流程排除：--main-accounts all 不展开到它，显式点名直接报错，poll 跳过账本里挂在它名下的任务。解封后从名单移除即恢复。",
+  "默认账号": null,
+  "_默认账号_说明": "留 null 就用所选主账号的当前子账号；要固定用某个子账号就填名字（如 main-a）。"
+}

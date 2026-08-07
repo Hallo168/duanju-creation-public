@@ -1,0 +1,20 @@
+# 运行环境与构建产物——不入库，新机器按本目录 README.md 用 安装.py 重建
+node_modules/
+.venv/
+__pycache__/
+*.pyc
+chatgpt2api/web/.next/
+
+# 运行时数据与凭据——绝不入库（三个上游项目自己的 .gitignore 也是同样设计）
+chatgpt2api/config.json
+chatgpt2api/.env
+chatgpt2api/data/
+chatgpt2api/logs/
+flow2api/config/setting.toml
+flow2api/config/setting_warp.toml
+flow2api/data/
+flow2api/tmp/
+flow2api/generated/
+flow2api/output/
+flow2api/src/tmp/
+flow2api/logs.txt
