@@ -3077,4 +3077,3 @@ class BrowserCaptchaService:
             "browsers": []
         }
         return base_stats
-

@@ -1,8 +1,8 @@
-﻿param(
+param(
     [string]$OutputDir = "",
     [string]$OpenCliRoot = "<OpenCLI-Symphony>",
     [string]$NodeExe = "",
-    [string]$FfprobeExe = "G:\AutoTool\ffprobe.exe",
+    [string]$FfprobeExe = "<本地工具目录>\ffprobe.exe",
     [string]$CompilerRoot = "",
     [switch]$ReuseCompiled
 )

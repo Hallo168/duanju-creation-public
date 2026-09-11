@@ -874,7 +874,7 @@ def create_app(
         prepare-only 的 return 之前，submitComposer 在其之后）。
 
         必须经这个端点走，不要在别处直接调 OpenCLI：OpenCLI 的缓存路径默认硬编码指向已停用的
-        F:\\tiktok-symphony-proxy，本进程的 SYMPHONY_ASSET_CACHE 会由子进程继承从而写对地方。
+        工具/symphony，本进程的 SYMPHONY_ASSET_CACHE 会由子进程继承从而写对地方。
         """
         missing = [ref for ref in body.refs if not Path(ref).is_file()]
         if missing:
@@ -896,6 +896,12 @@ def create_app(
                     detail = json.loads(bytes(switch.body).decode("utf-8")).get("error")
                 except (ValueError, UnicodeDecodeError):
                     detail = None
+                # 光靠 uvicorn 的一行裸 502 排障不出来（2026-08-08）：把账号与真实
+                # 原因落进代理日志。切号失败的第一嫌疑是该子账号已达当日日限（V31）。
+                logger.warning(
+                    "Warmup account switch failed for %s/%s: %s —— 首先怀疑账号日限（V31），不是模型故障",
+                    body.main_account or "(default)", body.account, detail,
+                )
                 return _error(
                     502,
                     "warmup_account_switch_failed",
@@ -920,6 +926,13 @@ def create_app(
             browser_profile=browser_profile_for(body.main_account),
         )
         if response.status_code != 200:
+            logger.warning(
+                "Warmup CLI failed on %s/%s (HTTP %s) —— 若错误含 could not switch model，"
+                "按账号日限处理（V31），不是模型故障",
+                body.main_account or "(default)",
+                body.account or "(current workspace)",
+                response.status_code,
+            )
             return response
         after = _cached_digests(asset_cache)
         still_missing = [

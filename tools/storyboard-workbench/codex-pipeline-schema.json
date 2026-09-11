@@ -1,0 +1,81 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "reply": {
+      "type": "string",
+      "description": "面向用户的完整中文回复；等待选择时必须包含全部候选内容"
+    },
+    "stage": {
+      "type": "string",
+      "enum": ["topic", "script", "assets", "storyboard"]
+    },
+    "phase": {
+      "type": "string",
+      "description": "本次实际执行的阶段内步骤"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["waiting_user", "completed", "blocked"]
+    },
+    "next_action": {
+      "type": "string",
+      "enum": [
+        "choose_topic",
+        "choose_opening",
+        "review_script",
+        "confirm_assets",
+        "open_storyboard",
+        "provide_product_image",
+        "none"
+      ]
+    },
+    "episode": {
+      "type": ["string", "null"],
+      "description": "已创建或正在处理的故事文件夹名；尚未落盘时为 null"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "action": {
+            "type": "string",
+            "enum": ["created", "updated", "verified", "none"]
+          },
+          "summary": { "type": "string" }
+        },
+        "required": ["path", "action", "summary"],
+        "additionalProperties": false
+      }
+    },
+    "rules_read": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "本次确实读取成功的规范路径，必须使用任务清单中的相对路径原样回填"
+    },
+    "rules_applied": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "本次实际采用的规范及其影响"
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": [
+    "reply",
+    "stage",
+    "phase",
+    "status",
+    "next_action",
+    "episode",
+    "artifacts",
+    "rules_read",
+    "rules_applied",
+    "warnings"
+  ],
+  "additionalProperties": false
+}

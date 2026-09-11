@@ -1,55 +1,78 @@
 # -*- coding: utf-8 -*-
-# Multi-API concurrent image generation with topological layers + cross-provider failover.
-# Handles BOTH grid tasks (refs -> edits) and asset tasks (no refs -> text-to-image) for every provider.
-# Providers: c2a (chatgpt2api, local deploy, sync, multipart local files -- DEFAULT MAIN CHANNEL,
-#            free + no concurrency cap, user ruling 2026-07-16)
-#            flow2api_banana2 (Gemini official format, local image-to-image -- COLORED-PENCIL ONLY,
-#            forced 9:16 + 1K + fixed prompt, user ruling 2026-08-02)
-#            poloai (sync edits, multipart local files) + wuyin (async image_gpt, via imgbb) -- BACKUPS, off by default.
-# Each provider has its own concurrency cap (semaphore); tasks round-robin across enabled providers;
-# a task that exhausts its primary provider fails over to the others.
-# Usage: python gen_grids_multi.py <task_json> [c2a_cap] [poloai_cap] [wuyin_cap]
-#   caps default 6/0/0; set a cap to 0 to disable that provider, >0 to enable as failover.
-# PREFLIGHT: c2a needs its backend up -- curl http://127.0.0.1:8000/v1/models -H "Authorization: Bearer <key>".
-# Colored-pencil tasks preflight Flow2API /models automatically and never fail over to another model.
+# Concurrent image generation with topological layers and fixed task routing.
+# Ordinary assets use chatgpt2api; colored-pencil derivatives use Flow2API Banana 2
+# only when the production switch permits them. Failed tasks never switch routes.
+# Usage: python gen_grids_multi.py <task_json> [c2a_cap]
+# c2a_cap defaults to 6; use 0 for colored-pencil-only batches.
+# Preflight ordinary batches against chatgpt2api /v1/models before submission.
+# Enabled colored-pencil batches preflight Flow2API /models automatically.
+import argparse
 import json, os, re, sys, shutil, base64, uuid, subprocess, time, threading, mimetypes, tomllib
 import urllib.error, urllib.request
 from concurrent.futures import ThreadPoolExecutor
 
-TASK_JSON  = sys.argv[1] if len(sys.argv) > 1 else r"<主仓库根>\工具\宫格任务-07-polo.json"
-C2A_CAP    = int(sys.argv[2]) if len(sys.argv) > 2 else 6
-POLO_CAP   = int(sys.argv[3]) if len(sys.argv) > 3 else 0
-WY_CAP     = int(sys.argv[4]) if len(sys.argv) > 4 else 0
+parser = argparse.ArgumentParser(description="Generate ordinary assets and colored-pencil references on their fixed routes.")
+parser.add_argument("task_json")
+parser.add_argument("c2a_cap", type=int, nargs="?", default=6)
+args = parser.parse_args()
+if args.c2a_cap < 0:
+    parser.error("c2a_cap must be zero or greater")
+TASK_JSON = args.task_json
+C2A_CAP = args.c2a_cap
 
-TOOLDIR = r"<主仓库根>\工具"
-_wyall = None
-for fn in os.listdir(TOOLDIR):
-    if fn.startswith("api") and fn.endswith(".json"):
-        try:
-            c = json.load(open(os.path.join(TOOLDIR, fn), encoding="utf-8"))
-            if c.get("providers", {}).get("wuyinkeji"):
-                _wyall = c; break
-        except Exception:
-            pass
-WY    = _wyall["providers"]["wuyinkeji"] if _wyall else None
-IMGBB = _wyall["imgbb"] if _wyall else None
-C2A   = (_wyall or {}).get("providers", {}).get("chatgpt2api")
-POLO  = (_wyall or {}).get("providers", {}).get("poloai")
-FLOW2 = (_wyall or {}).get("providers", {}).get("flow2api_banana2")
+TOOLDIR = os.path.dirname(os.path.abspath(__file__))
 
-PLAN   = json.load(open(TASK_JSON, encoding="utf-8"))
+def colored_pencil_enabled():
+    policy_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "生产开关.json")
+    try:
+        with open(policy_file, encoding="utf-8") as policy_stream:
+            enabled = json.load(policy_stream).get("colored_pencil_enabled")
+    except FileNotFoundError:
+        return True
+    if not isinstance(enabled, bool):
+        raise RuntimeError("invalid colored_pencil_enabled production setting")
+    return enabled
+
+def is_flow2_colored_task(t):
+    """Colored-pencil derivatives have a dedicated route controlled by the production switch."""
+    return t.get("provider") == "flow2api_banana2" or bool(
+        re.search("彩铅|素描", os.path.basename(t.get("file", "")))
+    )
+
+PLAN = json.load(open(TASK_JSON, encoding="utf-8"))
 OUTDIR = PLAN["output_dir"]
-tasks  = {t["id"]: t for t in PLAN["tasks"]}
+tasks = {t["id"]: t for t in PLAN["tasks"]}
+if not colored_pencil_enabled():
+    paused = {tid: task for tid, task in tasks.items() if is_flow2_colored_task(task)}
+    paused_files = {os.path.normcase(os.path.basename(task["file"])) for task in paused.values()}
+    for tid in paused:
+        print(tid + ": SKIP[colored-pencil temporarily disabled]", flush=True)
+        del tasks[tid]
+    for tid, task in tasks.items():
+        if any(os.path.normcase(os.path.basename(ref)) in paused_files or re.search("彩铅|素描", os.path.basename(ref)) for ref in task.get("refs", [])):
+            print(tid + ": blocked; replace paused pencil reference with the matching realistic image before submission")
+            sys.exit(2)
+    if not tasks:
+        print("Done. no image requests; colored-pencil tasks temporarily disabled", flush=True)
+        sys.exit(0)
+
+with open(os.path.join(TOOLDIR, "api配置.json"), encoding="utf-8") as config_file:
+    CONFIG = json.load(config_file)
+C2A = CONFIG.get("providers", {}).get("chatgpt2api")
+FLOW2 = CONFIG.get("providers", {}).get("flow2api_banana2")
+
+# Explicit caps must never override a provider disabled by the user.
+if C2A_CAP > 0 and C2A and C2A.get("disabled"):
+    print("chatgpt2api disabled in api configuration; stopped without submission")
+    sys.exit(2)
+
 TMP    = os.path.join(os.environ["TEMP"], "gridmulti")
 os.makedirs(TMP, exist_ok=True); os.makedirs(OUTDIR, exist_ok=True)
 
-def is_flow2_colored_task(t):
-    """Colored-pencil derivatives are a dedicated route, never a general-provider failover."""
-    if t.get("provider") == "flow2api_banana2":
-        return True
-    return "彩铅参考图" in os.path.basename(t.get("file", "")) and bool(t.get("refs"))
-
 for _tid, _task in tasks.items():
+    if _task.get("provider") not in (None, "", "c2a", "chatgpt2api", "flow2api_banana2"):
+        print("unsupported image provider in task: " + _tid)
+        sys.exit(2)
     if "彩铅参考图" in os.path.basename(_task.get("file", "")) and not _task.get("refs"):
         print("colored-pencil task requires exactly one source ref: " + _tid)
         sys.exit(1)
@@ -57,19 +80,15 @@ for _tid, _task in tasks.items():
 FLOW_TASK_IDS = [tid for tid, t in tasks.items() if is_flow2_colored_task(t)]
 REGULAR_TASK_IDS = [tid for tid, t in tasks.items() if not is_flow2_colored_task(t)]
 
-POLO_EP = POLO["base_url"].rstrip("/") + "/v1/images/edits" if POLO else ""
-if WY:
-    WY_BASE   = WY["base_url"].rstrip("/")
-    WY_SUBMIT = WY_BASE + "/api/async/image_gpt"
-    WY_DETAIL = WY_BASE + "/api/async/detail"
-    IMGBB_URL = "https://api.imgbb.com/1/upload?key=" + IMGBB["api_key"]
-
 if C2A:
     C2A_BASE = C2A["base_url"].rstrip("/")
     C2A_GEN  = C2A_BASE + "/v1/images/generations"
     C2A_EDIT = C2A_BASE + "/v1/images/edits"
 
 if FLOW2 and FLOW_TASK_IDS:
+    if FLOW2.get("disabled"):
+        print("flow2api_banana2 disabled in api configuration; stopped without submission")
+        sys.exit(2)
     _flow_settings_path = FLOW2["settings_path"]
     with open(_flow_settings_path, "rb") as _flow_settings_file:
         _flow_settings = tomllib.load(_flow_settings_file)
@@ -81,9 +100,7 @@ if FLOW2 and FLOW_TASK_IDS:
 else:
     FLOW2_CAP = 0
 
-PROVIDERS = ([("c2a", C2A_CAP)] if (C2A_CAP > 0 and C2A) else []) + \
-            ([("poloai", POLO_CAP)] if POLO_CAP > 0 else []) + \
-            ([("wuyin", WY_CAP)] if (WY_CAP > 0 and WY) else [])
+PROVIDERS = [("c2a", C2A_CAP)] if (C2A_CAP > 0 and C2A) else []
 FLOW_PROVIDERS = ([("flow2api_banana2", FLOW2_CAP)] if (FLOW_TASK_IDS and FLOW2) else [])
 if FLOW_TASK_IDS and not FLOW2:
     print("flow2api_banana2 provider missing"); sys.exit(1)
@@ -93,43 +110,6 @@ ALL_PROVIDERS = PROVIDERS + FLOW_PROVIDERS
 if not ALL_PROVIDERS:
     print("no providers enabled"); sys.exit(1)
 sems = {name: threading.Semaphore(cap) for name, cap in ALL_PROVIDERS}
-PNAMES = [n for n, _ in PROVIDERS]
-
-# ---- imgbb upload cache (dedup, per-key lock so same ref uploads once) ----
-_imgbb_cache = {}
-_keylocks = {}
-_klock = threading.Lock()
-def _kl(key):
-    with _klock:
-        if key not in _keylocks: _keylocks[key] = threading.Lock()
-        return _keylocks[key]
-def upload_imgbb(path, work):
-    key = os.path.abspath(path)
-    with _kl(key):
-        if key in _imgbb_cache: return _imgbb_cache[key]
-        ext = os.path.splitext(path)[1] or ".png"
-        ascii_tmp = os.path.join(work, "up_" + uuid.uuid4().hex[:8] + ext)
-        shutil.copy(path, ascii_tmp)
-        last = ""
-        for _ in range(4):
-            r = subprocess.run(["curl.exe", "-s", "--max-time", "120", "-F",
-                                "image=@" + ascii_tmp, IMGBB_URL], capture_output=True)
-            try:
-                resp = json.loads(r.stdout.decode("utf-8", "ignore"))
-                if resp.get("success"):
-                    url = resp["data"]["url"]; _imgbb_cache[key] = url; return url
-                last = r.stdout.decode("utf-8", "ignore")[:80]
-            except Exception:
-                last = "imgbb parse/throttle"
-            time.sleep(3)
-        raise RuntimeError("imgbb fail: " + last)
-
-def px_to_ratio(s):
-    m = re.match(r"(\d+)x(\d+)$", str(s))
-    if not m: return s
-    w, h = int(m.group(1)), int(m.group(2)); r = w / h
-    cands = {"1:1":1.0,"3:2":1.5,"2:3":.6667,"16:9":1.7778,"9:16":.5625,"4:3":1.3333,"3:4":.75}
-    return min(cands, key=lambda k: abs(cands[k] - r))
 
 def _resolve(r):
     return r if os.path.exists(r) else os.path.join(OUTDIR, r)
@@ -236,6 +216,8 @@ def gen_c2a(t, work):
     return _openai_image_bytes(resp, work)
 
 def gen_flow2api_banana2(t, work):
+    if not colored_pencil_enabled():
+        raise RuntimeError("colored-pencil generation temporarily disabled")
     refs = refs_of(t)
     if len(refs) != 1:
         raise RuntimeError("Flow2API colored-pencil task requires exactly one source ref")
@@ -284,64 +266,9 @@ def gen_flow2api_banana2(t, work):
     mime = found.get("mimeType") or found.get("mime_type") or "image/jpeg"
     return _as_png(base64.b64decode(found["data"]), mime, work)
 
-def gen_poloai(t, work):
-    args = ["curl.exe","-s","-X","POST",POLO_EP,
-            "-H","Authorization: Bearer " + POLO["api_key"],
-            "-F","model=" + POLO["model"], "-F","prompt=<" + prompt_as_file(t, work),
-            "-F","size=" + str(t["size"])]
-    args += ref_args(t, work, "image[]")
-    resp = os.path.join(work, "resp.json")
-    if os.path.exists(resp): os.remove(resp)
-    subprocess.run(args + ["-o", resp, "--max-time", "600"], capture_output=True)
-    return _openai_image_bytes(resp, work)
-
-def gen_wuyin(t, work):
-    prompt = prompt_text(t)
-    ratio = px_to_ratio(t["size"])
-    urls = []
-    for r in refs_of(t):
-        rr = _resolve(r)
-        if not os.path.exists(rr): raise RuntimeError("ref missing " + os.path.basename(r))
-        urls.append(upload_imgbb(rr, work))
-    body = {"prompt": prompt, "size": ratio}
-    if urls: body["urls"] = urls
-    reqf = os.path.join(work, "req.json")
-    open(reqf, "w", encoding="utf-8").write(json.dumps(body, ensure_ascii=False))
-    subf = os.path.join(work, "sub.json")
-    if os.path.exists(subf): os.remove(subf)
-    subprocess.run(["curl.exe","-s","-o",subf,"-X","POST",WY_SUBMIT,
-                    "-H","Authorization: " + WY["api_key"], "-H","Content-Type: application/json",
-                    "--data","@" + reqf], capture_output=True)
-    if not os.path.exists(subf): raise RuntimeError("no submit resp")
-    sub = json.load(open(subf, encoding="utf-8"))
-    tid = (sub.get("data") or {}).get("task_id") or (sub.get("data") or {}).get("id")
-    if sub.get("code") != 200 or not tid: raise RuntimeError("submit rejected")
-    imgurl = None; detf = os.path.join(work, "det.json")
-    for _ in range(40):
-        time.sleep(8)
-        if os.path.exists(detf): os.remove(detf)
-        subprocess.run(["curl.exe","-s","-o",detf, WY_DETAIL + "?id=" + str(tid),
-                        "-H","Authorization: " + WY["api_key"]], capture_output=True)
-        if not os.path.exists(detf): continue
-        det = json.load(open(detf, encoding="utf-8"))
-        st = (det.get("data") or {}).get("status")
-        if st == 2: imgurl = det["data"]["result"][0]; break
-        if st == 3: raise RuntimeError("task failed")
-    if not imgurl: raise RuntimeError("poll timeout")
-    o = os.path.join(work, "o.png")
-    # scapi.net result: curl TLS fails -> download via powershell IWR
-    subprocess.run(["powershell","-NoProfile","-Command",
-                    "[Net.ServicePointManager]::SecurityProtocol=[Net.SecurityProtocolType]::Tls12;"
-                    "Invoke-WebRequest -Uri '%s' -OutFile '%s' -UseBasicParsing -TimeoutSec 300" % (imgurl, o)],
-                   capture_output=True)
-    if not os.path.exists(o): raise RuntimeError("download failed")
-    return open(o, "rb").read()
-
 GENERATORS = {
     "c2a": gen_c2a,
     "flow2api_banana2": gen_flow2api_banana2,
-    "poloai": gen_poloai,
-    "wuyin": gen_wuyin,
 }
 
 # ---- topological layers from refs deps ----
@@ -363,32 +290,27 @@ for tid in tasks: get_depth(tid)
 layers = {}
 for tid, d in depth.items(): layers.setdefault(d, []).append(tid)
 
-def run_task(tid, primary):
+def run_task(tid, provider):
     t = tasks[tid]
     outFile = os.path.join(OUTDIR, t["file"])
     if os.path.exists(outFile): return (tid, "SKIP")
-    if is_flow2_colored_task(t):
-        order = ["flow2api_banana2"]
-    else:
-        order = [primary] + [p for p in PNAMES if p != primary]
     last = ""
-    for prov in order:
-        tries = 1 if prov == "flow2api_banana2" else (6 if prov == primary else 2)
-        for attempt in range(tries):
-            work = os.path.join(TMP, tid + "_" + uuid.uuid4().hex[:6])
-            os.makedirs(work, exist_ok=True)
-            try:
-                with sems[prov]:
-                    data = GENERATORS[prov](t, work)
-                if data and len(data) >= 1024:
-                    open(outFile, "wb").write(data)
-                    return (tid, "OK[%s]%s" % (prov, "" if attempt == 0 and prov == primary else "*"))
-                last = "tiny/no data"
-            except Exception as e:
-                last = "%s:%s" % (prov, str(e)[:70])
-            finally:
-                shutil.rmtree(work, ignore_errors=True)
-            time.sleep(4)
+    tries = 1 if provider == "flow2api_banana2" else 6
+    for attempt in range(tries):
+        work = os.path.join(TMP, tid + "_" + uuid.uuid4().hex[:6])
+        os.makedirs(work, exist_ok=True)
+        try:
+            with sems[provider]:
+                data = GENERATORS[provider](t, work)
+            if data and len(data) >= 1024:
+                open(outFile, "wb").write(data)
+                return (tid, "OK[%s]%s" % (provider, "" if attempt == 0 else "*"))
+            last = "tiny/no data"
+        except Exception as e:
+            last = "%s:%s" % (provider, str(e)[:70])
+        finally:
+            shutil.rmtree(work, ignore_errors=True)
+        time.sleep(4)
     return (tid, "FAIL " + last)
 
 if FLOW_TASK_IDS:
@@ -404,8 +326,8 @@ for lyr in sorted(layers):
         futs = [ex.submit(
             run_task,
             tid,
-            "flow2api_banana2" if is_flow2_colored_task(tasks[tid]) else PNAMES[i % len(PNAMES)],
-        ) for i, tid in enumerate(ids)]
+            "flow2api_banana2" if is_flow2_colored_task(tasks[tid]) else "c2a",
+        ) for tid in ids]
         for f in futs:
             tid, res = f.result()
             print("  %s: %s" % (tid, res), flush=True)

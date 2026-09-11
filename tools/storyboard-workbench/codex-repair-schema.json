@@ -1,0 +1,59 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "reply": {
+      "type": "string",
+      "description": "面向用户的简明中文回复"
+    },
+    "diagnosis": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "对本次翻车原因的诊断"
+    },
+    "revised_prompt": {
+      "type": "string",
+      "description": "完整、可直接替换当前单元的修复后提示词"
+    },
+    "changes": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "本次具体改动"
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "仍需用户注意或确认的事项"
+    },
+    "rules_read": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "本次确实读取过的规范或上下文路径。必须使用任务清单给出的相对路径原样回填，不得把未读取文件写入"
+    },
+    "rules_applied": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "本次实际采用的规则，写明规则编号或章节及其如何影响修改"
+    },
+    "repair_level": {
+      "type": "string",
+      "description": "本次采用的修复阶梯级别或专项写法分支，例如 阶梯2-收紧约束、写法分支-状态漂移"
+    },
+    "video_basis": {
+      "type": "string",
+      "description": "说明本次如何使用视频信息。工作台不抽帧且 CLI 不直接观看视频，必须如实说明以用户描述和文本上下文为判断依据"
+    }
+  },
+  "required": [
+    "reply",
+    "diagnosis",
+    "revised_prompt",
+    "changes",
+    "warnings",
+    "rules_read",
+    "rules_applied",
+    "repair_level",
+    "video_basis"
+  ],
+  "additionalProperties": false
+}

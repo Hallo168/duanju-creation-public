@@ -80,12 +80,14 @@ QUOTA_RESET_HOUR = 8  # 账号日额度每天早上 8 点刷新（2026-08-01 用
 # ---------------------------------------------------------------- 配置与请求
 
 
-def load_config() -> tuple[str, dict]:
+def load_config(*, allow_disabled: bool = False) -> tuple[str, dict]:
     """base_url 以 api配置.json 为准；本机路径（ffprobe/默认账号）读 symphony配置.json。"""
     try:
         provider = json.loads(CONFIG_PATH.read_text(encoding="utf-8-sig")).get("providers", {}).get(PROVIDER, {})
     except (OSError, json.JSONDecodeError) as exc:
         raise RuntimeError(f"无法读取统一 API 配置 {CONFIG_PATH}: {exc}") from exc
+    if not allow_disabled and (provider.get("disabled") is True or provider.get("enabled") is False):
+        raise RuntimeError("TK（Symphony）视频生成渠道已停用；当前默认使用 Guagu，禁止向 TK 提交新任务。")
     base_url = str(provider.get("base_url") or DEFAULT_BASE_URL).rstrip("/")
     local: dict = {}
     if LOCAL_CONFIG_PATH.exists():
@@ -689,6 +691,7 @@ def main_account_sub_names(status: dict, main_account: str) -> list[str]:
 
 def pick_warmup_target(
     status: dict, args: argparse.Namespace, local: dict,
+    exclude: set[str] | frozenset[str] = frozenset(),
 ) -> tuple[str, str | None] | None:
     """挑一个能开浏览器干活的「主账号/子账号」对。
 
@@ -703,7 +706,12 @@ def pick_warmup_target(
     在进创作面板前先 `account --use` 切过去。
 
     候选顺序：--main-account（显式指定，最高优先）→ --main-accounts 展开的列表 →
-    配置里的默认主账号。全部被限则返回 None，由调用方停批。
+    配置里的默认主账号打头、其余已登录主账号自动兜底（2026-08-08 用户裁定：默认
+    也要能落到另一个主账号——asset_cache 是全局表跨主账号复用，warmup 换主账号
+    零成本；submit 的默认账号范围不受此影响）。全部被限则返回 None，由调用方停批。
+
+    exclude：本次运行里已确认进不去创作面板、又拿不到子账号名单无法精确标记的
+    主账号，整个跳过。
     """
     default_main = local.get("默认主账号")
     disabled = disabled_main_accounts(local)
@@ -712,7 +720,9 @@ def pick_warmup_target(
     elif args.main_accounts is not None:
         candidates = resolve_main_accounts(status, args.main_accounts, default_main, disabled)
     else:
-        candidates = [str(default_main)] if default_main else []
+        others = [name for name in known_main_accounts(status) if name != str(default_main)]
+        candidates = ([str(default_main)] if default_main else []) + others
+    candidates = [name for name in candidates if str(name) not in exclude]
     live = [name for name in candidates if str(name) not in disabled]
     if len(live) != len(candidates):
         print(
@@ -800,31 +810,72 @@ def warmup(args: argparse.Namespace) -> int:
         return 0
 
     print(f"WARMUP {len(todo)} 张待入库（不扣积分，每批最多 {MAX_REFS} 张）", flush=True)
+    # 进不去创作面板、又拿不到子账号名单无法精确标记的主账号，本次整个跳过
+    dead_mains: set[str] = set()
+    exhausted = False
     for start in range(0, len(todo), MAX_REFS):
+        if exhausted:
+            break
         chunk = todo[start:start + MAX_REFS]
-        print(f"UPLOADING {[Path(r).name for r in chunk]}", flush=True)
-        try:
-            data = api_json(
-                f"{base_url}/v1/assets/warmup",
-                method="POST",
-                payload={
-                    "refs": chunk,
-                    "timeout": args.warmup_timeout,
-                    **({"main_account": main_account} if main_account else {}),
-                    **({"account": sub_account} if sub_account else {}),
-                },
-                timeout=args.warmup_timeout + 60,
-            )["data"]
-            print(f"CACHED newly={data.get('newly_cached')} still_missing={data.get('still_missing')}", flush=True)
-        except (ProxyError, RuntimeError) as exc:
-            # OpenCLI 在写完缓存之后仍可能非零退出（prepare-only 分支实测如此）。
-            # 成败一律以缓存实际内容为准，不看退出码——最后统一复核。
-            print(f"WARMUP_CLI_NONZERO {exc}", file=sys.stderr, flush=True)
-            if "could not switch" in str(exc).lower() or "无法切换" in str(exc):
+        while True:
+            print(f"UPLOADING {[Path(r).name for r in chunk]}", flush=True)
+            try:
+                data = api_json(
+                    f"{base_url}/v1/assets/warmup",
+                    method="POST",
+                    payload={
+                        "refs": chunk,
+                        "timeout": args.warmup_timeout,
+                        **({"main_account": main_account} if main_account else {}),
+                        **({"account": sub_account} if sub_account else {}),
+                    },
+                    timeout=args.warmup_timeout + 60,
+                )["data"]
+                print(f"CACHED newly={data.get('newly_cached')} still_missing={data.get('still_missing')}", flush=True)
+                break
+            except (ProxyError, RuntimeError) as exc:
+                # OpenCLI 在写完缓存之后仍可能非零退出（prepare-only 分支实测如此）。
+                # 成败一律以缓存实际内容为准，不看退出码——最后统一复核。
+                print(f"WARMUP_CLI_NONZERO {exc}", file=sys.stderr, flush=True)
+                text = str(exc)
+                if "could not switch" not in text.lower() and "无法切换" not in text:
+                    break
+                # 「无法切换」＝账号日限不是模型故障（V31）。2026-08-08 起自动化：
+                # 当场落盘标记＋换号重试本批，不再要求人工补记。
+                if sub_account:
+                    mark_account_limited(
+                        sub_account,
+                        f"warmup 进不去创作面板，按 V31 判当日日限：{text[:200]}",
+                        main_account,
+                    )
+                    print(
+                        f"ACCOUNT_LIMITED {main_account}/{sub_account} 判定为账号日限"
+                        "（不是模型故障），已写入 工具/symphony/data/账号限制.json",
+                        flush=True,
+                    )
+                else:
+                    dead_mains.add(str(main_account))
+                    print(
+                        f"WARMUP_SWITCH_FAIL {main_account}/（当前workspace）进不去创作面板，"
+                        "子账号名单不可得、无法精确标记日限，本次跳过该主账号",
+                        file=sys.stderr, flush=True,
+                    )
+                target = pick_warmup_target(status, args, local, exclude=dead_mains)
+                if target is None:
+                    print(
+                        f"ERROR 候选主账号全部用尽（日限或切号失败），热预存中止；"
+                        f"明早{QUOTA_RESET_HOUR}点额度刷新后再跑，"
+                        "或用 --main-account 指定还有额度的主账号",
+                        file=sys.stderr, flush=True,
+                    )
+                    exhausted = True
+                    break
+                main_account, sub_account = target
+                if args.warmup_current:
+                    sub_account = None
                 print(
-                    "HINT 「无法切换」= 账号额度问题不是模型问题（V31）：当前子账号大概率已达日限"
-                    "但还没被写盘标记；确认后可手工补记进 工具/symphony/data/账号限制.json 再重跑",
-                    file=sys.stderr, flush=True,
+                    f"WARMUP_RETRY 换用 {main_account}/{sub_account or '（当前workspace）'} 重试本批",
+                    flush=True,
                 )
 
     remaining = uncached_refs(todo, load_asset_cache())
@@ -1353,7 +1404,7 @@ def ffprobe_resolution(ffprobe: str, path: Path) -> str | None:
 
 
 def poll(args: argparse.Namespace) -> int:
-    base_url, local = load_config()
+    base_url, local = load_config(allow_disabled=True)
     story_root = Path(args.story_root).resolve()
     ledger = Path(args.ledger).resolve()
     entries = load_ledger(ledger)

@@ -28,16 +28,16 @@ from canvas_video_batch import (
 )
 
 
-DEFAULT_BASE_URL = "http://152.32.190.251:8888"
+DEFAULT_BASE_URL = "https://guagu.cc"
 
 
 def video_prompt(section: str, unit: int) -> str:
     """Read the authored prompt verbatim; Guagu accepts the mounted three-view assets."""
     # 现行契约为「### 单元提示词」（2026-07-23 宫格法废止）；老集宫格法文件回退「### 宫格转视频提示词」
     match = re.search(
-        r"(?ms)^### 单元提示词\s*\n```(?:\w+)?\s*\n(.*?)\n```", section
+        r"(?ms)^### 单元提示词\s*\n(?:```|~~~)(?:\w+)?\s*\n(.*?)\n(?:```|~~~)", section
     ) or re.search(
-        r"(?ms)^### 宫格转视频提示词\s*\n```(?:\w+)?\s*\n(.*?)\n```", section
+        r"(?ms)^### 宫格转视频提示词\s*\n(?:```|~~~)(?:\w+)?\s*\n(.*?)\n(?:```|~~~)", section
     )
     if not match:
         raise ValueError(f"单元{unit}未找到单元提示词（老集回退：宫格转视频提示词）")
@@ -143,6 +143,7 @@ def prepare_units(
     prompt_file: str,
     grid_dir: str | None,
     allow_partial_grids: bool,
+    resolution: str = "720p",
 ) -> dict[int, dict]:
     markdown_path = story_root / prompt_file
     markdown = markdown_path.read_text(encoding="utf-8")
@@ -168,7 +169,7 @@ def prepare_units(
             raise ValueError(f"单元{unit}未找到生成参数时长行")
         duration = int(duration_match.group(1))
         prepared[unit] = {"prompt": prompt, "paths": paths, "duration": duration}
-        print(f"PREFLIGHT unit={unit} images={len(paths)} duration={duration} ratio=9:16 resolution=720p", flush=True)
+        print(f"PREFLIGHT unit={unit} images={len(paths)} duration={duration} ratio=9:16 resolution={resolution}", flush=True)
     return prepared
 
 
@@ -231,27 +232,75 @@ def recover_by_request_id(session: requests.Session, base_url: str, request_ids:
     }
 
 
-def submit(args: argparse.Namespace) -> int:
-    token, configured_base_url = load_video_provider_config(
-        "guagu_video", "GUAGU_VIDEO_API_KEY", DEFAULT_BASE_URL
-    )
-    base_url = (args.base_url or configured_base_url).rstrip("/")
-    session = session_for(token)
+def require_current_model(
+    args: argparse.Namespace,
+    session: requests.Session,
+    base_url: str,
+) -> dict:
     models = get_with_transient_retry(
         session, base_url + "/openapi/v1/video-generations/models", timeout=30
     )
     selected = [
         row for row in models
         if row.get("model") == args.model
-        and row.get("resolution") == "720p"
+        and (not args.resolution or row.get("resolution") == args.resolution)
         and row.get("type") == "image_to_video"
     ]
     if len(selected) != 1:
-        raise RuntimeError("当前模型表不再包含已确认的 seedance2.0/720p/image_to_video，停止提交")
+        raise RuntimeError(
+            f"当前模型表无法唯一匹配已确认的 image_to_video 模型 {args.model}"
+            f"（分辨率：{args.resolution or '按实时模型表'}），停止操作"
+        )
+    model = selected[0]
+    if not isinstance(model.get("resolution"), str) or not model["resolution"].strip():
+        raise RuntimeError("当前模型表没有返回可确认的 resolution，停止操作")
     print(
-        f"MODEL model={args.model} resolution=720p cost={selected[0].get('credit_cost')} producible={selected[0].get('producible')}",
+        f"MODEL model={args.model} resolution={model['resolution']} cost={model.get('credit_cost')} producible={model.get('producible')}",
         flush=True,
     )
+    return model
+
+
+def preflight(args: argparse.Namespace) -> int:
+    token, configured_base_url = load_video_provider_config(
+        "guagu_video", "GUAGU_VIDEO_API_KEY", DEFAULT_BASE_URL
+    )
+    base_url = (args.base_url or configured_base_url).rstrip("/")
+    session = session_for(token)
+    model = require_current_model(args, session, base_url)
+    story_root = Path(args.story_root).resolve()
+    units = parse_units(args.units)
+    prepared = prepare_units(
+        story_root,
+        units,
+        args.prompt_file,
+        args.grid_dir,
+        args.allow_partial_grids,
+        resolution=model["resolution"],
+    )
+    if args.duration is not None:
+        if args.duration <= 0:
+            raise ValueError("--duration 必须为正整数")
+        for item in prepared.values():
+            item["duration"] = args.duration
+    unit_cost = model.get("credit_cost")
+    if not isinstance(unit_cost, (int, float)):
+        raise RuntimeError("当前模型表没有返回可确认的 credit_cost，停止操作")
+    total_cost = round(float(unit_cost) * len(units), 6)
+    print(
+        f"BUDGET units={len(units)} unit_cost={unit_cost} total={total_cost}",
+        flush=True,
+    )
+    return 0
+
+
+def submit(args: argparse.Namespace) -> int:
+    token, configured_base_url = load_video_provider_config(
+        "guagu_video", "GUAGU_VIDEO_API_KEY", DEFAULT_BASE_URL
+    )
+    base_url = (args.base_url or configured_base_url).rstrip("/")
+    session = session_for(token)
+    model = require_current_model(args, session, base_url)
 
     story_root = Path(args.story_root).resolve()
     units = parse_units(args.units)
@@ -265,6 +314,7 @@ def submit(args: argparse.Namespace) -> int:
         args.prompt_file,
         args.grid_dir,
         args.allow_partial_grids,
+        resolution=model["resolution"],
     )
     if args.duration is not None:
         if args.duration <= 0:
@@ -275,7 +325,8 @@ def submit(args: argparse.Namespace) -> int:
 
     unique_paths = sorted({path for item in prepared.values() for path in item["paths"]}, key=str)
     assets: dict[Path, dict] = {}
-    with ThreadPoolExecutor(max_workers=min(args.concurrency, len(unique_paths))) as pool:
+    # The current Guagu protocol recommends at most two concurrent uploads.
+    with ThreadPoolExecutor(max_workers=min(args.concurrency, 2, len(unique_paths))) as pool:
         futures = {pool.submit(upload_reference, session_for(token), base_url, path): path for path in unique_paths}
         for future in as_completed(futures):
             path = futures[future]
@@ -286,7 +337,7 @@ def submit(args: argparse.Namespace) -> int:
     errors: dict[int, str] = {}
     story_slug = re.sub(r"[^A-Za-z0-9_-]+", "-", story_root.name).strip("-") or "story"
     request_ids = {
-        unit: f"{story_slug}-unit{unit}-{args.model}-720p-{args.version}"
+        unit: f"{story_slug}-unit{unit}-{args.model}-{model['resolution']}-{args.version}"
         for unit in units
     }
 
@@ -295,7 +346,7 @@ def submit(args: argparse.Namespace) -> int:
         payload = {
             "model": args.model,
             "prompt": item["prompt"],
-            "resolution": "720p",
+            "resolution": model["resolution"],
             "ratio": "9:16",
             "duration": item["duration"],
             "generate_audio": True,
@@ -320,6 +371,7 @@ def submit(args: argparse.Namespace) -> int:
             "platform": "guagu",
             "unit": unit,
             "model": args.model,
+            "resolution": model["resolution"],
             "task_id": str(data["id"]),
             "request_id": str(data.get("request_id") or request_ids[unit]),
             "estimated_cost": data.get("estimated_cost"),
@@ -350,6 +402,7 @@ def submit(args: argparse.Namespace) -> int:
                     "platform": "guagu",
                     "unit": unit,
                     "model": args.model,
+                    "resolution": model["resolution"],
                     "task_id": str(row["id"]),
                     "request_id": request_ids[unit],
                     "estimated_cost": row.get("estimated_cost"),
@@ -491,12 +544,13 @@ def poll(args: argparse.Namespace) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=["submit", "poll"])
+    parser.add_argument("mode", choices=["preflight", "submit", "poll"])
     parser.add_argument("--story-root", required=True)
-    parser.add_argument("--ledger", required=True)
+    parser.add_argument("--ledger", default="")
     parser.add_argument("--units", default="")
     parser.add_argument("--base-url", default=None, help="覆盖统一 API 配置中的 base_url")
     parser.add_argument("--model", default="")
+    parser.add_argument("--resolution", default=None, help="已确认模型的分辨率；省略时按实时模型表唯一匹配")
     parser.add_argument("--prompt-file", default="分镜提示词.md")
     parser.add_argument("--grid-dir", default=None, help="相对故事目录的宫格版本目录")
     parser.add_argument("--allow-partial-grids", action="store_true")
@@ -507,10 +561,14 @@ def main() -> int:
     parser.add_argument("--version", default="v2")
     parser.add_argument("--duration", type=int, default=None, help="覆盖本批发送给 Guagu 的视频时长；需经用户明确确认")
     args = parser.parse_args()
-    if args.mode == "submit" and not args.units:
-        parser.error("submit 需要 --units")
-    if args.mode == "submit" and not args.model:
-        parser.error("submit 需要 --model，模型必须按当前批次与用户确认")
+    if args.mode in {"preflight", "submit"} and not args.units:
+        parser.error(f"{args.mode} 需要 --units")
+    if args.mode in {"preflight", "submit"} and not args.model:
+        parser.error(f"{args.mode} 需要 --model，模型必须按当前批次与用户确认")
+    if args.mode in {"submit", "poll"} and not args.ledger:
+        parser.error(f"{args.mode} 需要 --ledger")
+    if args.mode == "preflight":
+        return preflight(args)
     return submit(args) if args.mode == "submit" else poll(args)
 
 

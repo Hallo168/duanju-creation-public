@@ -1,45 +1,61 @@
-# Binaries and installers (not creative source assets)
+# Local accounts, credentials and assistant settings
+.env*
+!.env.example
+.codex/
+.agents/
+.claude/*
+!.claude/commands/
+!.claude/skills/
+AGENTS.local.md
+外部依赖/chatgpt2api/config.json
+外部依赖/flow2api/config/setting.toml
+外部依赖/flow2api/config/setting_warp.toml
+工具/api配置.json
+工具/symphony/symphony配置.json
+工具/剪映/剪映配置.json
+# Dependencies and runtime output
+node_modules/
+.venv/
+venv/
+__pycache__/
+*.py[cod]
+.next/
+.wrangler/
+.local/
+.pytest_cache/
+dist/
+build/
+logs/
+*.log
+*.err
+*.tmp
+*.bak
+data/
+cache/
+tmp/
+output/
+generated/
+工具/运行垃圾/
+# Local stories and media
+stories/*
+!stories/.gitkeep
 *.exe
 *.apk
-
-# Rendered videos are kept locally, not in GitHub backup
+*.zip
+*.7z
 *.mp4
 *.mov
 *.avi
 *.mkv
 *.webm
-*.flv
-*.m4v
-
-# Backup helper state
-.git-backup-*
-
-# Python cache
-__pycache__/
-*.py[cod]
-
-# Runtime garbage
-*.log
-*.err.log
-工具/运行垃圾/logs/*
-工具/运行垃圾/tasks/*
-工具/运行垃圾/tmp/*
-!工具/运行垃圾/README.md
-!工具/运行垃圾/.gitkeep
-!工具/运行垃圾/logs/.gitkeep
-!工具/运行垃圾/tasks/.gitkeep
-!工具/运行垃圾/tmp/.gitkeep
-
-# Claude Code internal
-.claude/launch.json
-# Generated story workspaces and assets stay local
-/stories/
-
-# Public snapshot runtime protection
-.env*
-*.log
-*.err
-**/data/
-**/cache/
-**/tmp/
-**/__pycache__/
+*.mp3
+*.wav
+*.m4a
+*.png
+*.jpg
+*.jpeg
+*.webp
+*.gif
+*.sqlite*
+*.db
+*.xlsx

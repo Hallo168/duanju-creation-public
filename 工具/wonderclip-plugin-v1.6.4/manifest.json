@@ -1,0 +1,26 @@
+{
+  "id": "wonderclip",
+  "name": "dadao 视频生成",
+  "version": "1.6.4",
+  "kind": "video",
+  "runtime": "js",
+  "entry": "handler.js",
+  "billing": "byo",
+  "description": "视频生成模型，自带 Key、本地直连、不消耗铃铛。",
+  "models": [
+    {
+      "id": "wan3.0-video",
+      "name": "dadao 视频",
+      "kind": "video",
+      "durations": [4, 5, 10, 15, 20, 30],
+      "resolutions": ["720p", "1080p"],
+      "ratios": ["16:9", "9:16", "4:3", "3:4", "1:1"],
+      "referenceInputs": ["image", "audio", "video"]
+    }
+  ],
+  "config": [
+    { "key": "base_url", "label": "接口地址（new-api 计费入口）", "type": "text", "default": "", "required": true },
+    { "key": "api_key", "label": "API Key（客户在 new-api 的密钥）", "type": "password", "default": "", "required": true },
+    { "key": "poll_timeout", "label": "轮询超时（秒）", "type": "number", "default": 1800 }
+  ]
+}

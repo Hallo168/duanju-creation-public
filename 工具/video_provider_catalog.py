@@ -11,6 +11,7 @@ from __future__ import annotations
 import argparse
 import json
 import os
+import re
 import sys
 import urllib.error
 import urllib.request
@@ -41,10 +42,23 @@ def endpoint_url(provider: dict, endpoint: str) -> str:
 
 def token_for(provider: dict) -> str:
     env_name = str(provider.get("credential_env_override") or "")
-    return os.environ.get(env_name) or str(provider.get("api_key") or "")
+    value = os.environ.get(env_name) or str(provider.get("api_key") or "")
+    if value:
+        return value
+    source = str(provider.get("credential_file") or "")
+    if source:
+        field = str(provider.get("credential_field") or "KEY")
+        text = Path(source).read_text(encoding="utf-8-sig")
+        found = re.search(r"(?im)^" + re.escape(field) + r"\s*[:：]\s*(\S+)", text)
+        if not found:
+            raise RuntimeError("凭据文件缺少指定密钥字段")
+        return found.group(1)
+    return ""
 
 
-def request_models(provider: dict) -> object:
+def request_models(provider: dict, timeout: float = 30) -> object:
+    if provider.get("disabled") is True or provider.get("enabled") is False:
+        raise RuntimeError("视频渠道已停用")
     url = endpoint_url(provider, "models")
     headers = {
         "Accept": "application/json",
@@ -58,7 +72,7 @@ def request_models(provider: dict) -> object:
         headers["Authorization"] = f"Bearer {token}"
     request = urllib.request.Request(url, headers=headers)
     try:
-        with urllib.request.urlopen(request, timeout=30) as response:
+        with urllib.request.urlopen(request, timeout=timeout) as response:
             return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
         detail = exc.read().decode("utf-8", "replace")[:300]
@@ -107,11 +121,23 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="从 api配置.json 发现并实时查询视频模型")
     parser.add_argument("--provider", action="append", help="只查询指定 provider，可重复")
     parser.add_argument("--json", action="store_true", help="输出结构化 JSON（不含密钥）")
+    parser.add_argument("--timeout", type=float, default=30, help="单个渠道的读取超时秒数")
     args = parser.parse_args()
+    if args.timeout <= 0:
+        parser.error("--timeout 必须为正数")
     providers = read_config().get("providers", {})
+    disabled_requested = [
+        name for name in args.provider or []
+        if isinstance(providers.get(name), dict)
+        and (providers[name].get("disabled") is True or providers[name].get("enabled") is False)
+    ]
+    if disabled_requested:
+        parser.error("视频渠道已停用：" + "、".join(disabled_requested))
     selected = {
         name: value for name, value in providers.items()
-        if isinstance(value, dict) and value.get("kind") in VIDEO_KINDS and (not args.provider or name in args.provider)
+        if isinstance(value, dict) and value.get("kind") in VIDEO_KINDS
+        and value.get("disabled") is not True and value.get("enabled") is not False
+        and (not args.provider or name in args.provider)
     }
     if not selected:
         parser.error("没有匹配到配置中的视频 provider")
@@ -120,7 +146,7 @@ def main() -> int:
     for name, provider in selected.items():
         item = {"provider": name, "kind": provider.get("kind"), "base_url": provider.get("base_url")}
         try:
-            item["models"] = video_model_rows(request_models(provider))
+            item["models"] = video_model_rows(request_models(provider, timeout=args.timeout))
         except RuntimeError as exc:
             item["error"] = str(exc)
             status = 1

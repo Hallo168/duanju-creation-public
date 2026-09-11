@@ -1,0 +1,94 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "properties": {
+    "reply": {
+      "type": "string",
+      "description": "面向用户的完整中文回复"
+    },
+    "status": {
+      "type": "string",
+      "enum": ["waiting_user", "completed", "blocked"]
+    },
+    "episode": {
+      "type": ["string", "null"],
+      "description": "当前或新建的故事文件夹名，没有则为 null"
+    },
+    "session_summary": {
+      "type": "string",
+      "description": "供后续会话恢复使用的简洁事实摘要"
+    },
+    "rules_read": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "本轮确实读取的规范相对路径，按任务清单原样回填"
+    },
+    "rules_applied": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "实际采用的规则及其对结果的具体影响"
+    },
+    "memory_update": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "值得保留、但仍需用户决定是否钉住的记忆候选"
+    },
+    "decisions": {
+      "type": "array",
+      "items": { "type": "string" },
+      "description": "本轮已确认的业务决定"
+    },
+    "artifacts": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "action": {
+            "type": "string",
+            "enum": ["created", "updated", "verified", "proposed", "none"]
+          },
+          "summary": { "type": "string" }
+        },
+        "required": ["path", "action", "summary"],
+        "additionalProperties": false
+      }
+    },
+    "file_changes": {
+      "type": "array",
+      "description": "仅供无本地文件工具的 API 适配器安全写盘；Codex CLI 通常返回空数组",
+      "items": {
+        "type": "object",
+        "properties": {
+          "path": { "type": "string" },
+          "content": { "type": "string" }
+        },
+        "required": ["path", "content"],
+        "additionalProperties": false
+      }
+    },
+    "next_actions": {
+      "type": "array",
+      "items": { "type": "string" }
+    },
+    "warnings": {
+      "type": "array",
+      "items": { "type": "string" }
+    }
+  },
+  "required": [
+    "reply",
+    "status",
+    "episode",
+    "session_summary",
+    "rules_read",
+    "rules_applied",
+    "memory_update",
+    "decisions",
+    "artifacts",
+    "file_changes",
+    "next_actions",
+    "warnings"
+  ],
+  "additionalProperties": false
+}

@@ -58,7 +58,7 @@ cd <主仓库根>\工具\symphony
 | 可选时长 | 5、10、12、15 秒 |
 | 参考图 | 最多 9 张 |
 | 计价 | 当前观测约 1 秒 1 积分；实际以平台返回的余额和计费结果为准 |
-| 账号结构 | 主账号（一份独立登录态）下挂子账号；本机当前 2 个主账号共 15 个子账号（`main-a` 5 个、`main-b` 10 个），积分与渲染额度按子账号彼此独立 |
+| 账号结构 | 主账号（一份独立登录态）下挂子账号；本机当前 2 个主账号共 15 个子账号（`main-a` 5 个：main-a~main-e、`main-b` 10 个），积分与渲染额度按子账号彼此独立 |
 | 渲染并发 | 每个子账号最多约 5 条同时渲染 |
 | 提交行为 | 平台可能接收超额排队，但本地执行器与代理实行硬节流：单账号达到 5 条即等待 |
 | 输出 | 常见为 720×1280 或 1080×1920，必须用 ffprobe 核验 |
@@ -321,8 +321,8 @@ stories\<故事>\分镜-15秒\成片\<单元>单元-symphony.mp4
 
 | 主账号别名 / OpenCLI Profile | 子账号数 |
 |---|---:|
-| `main-a` | 5 |
-| `main-b` | 10 |
+| `main-a` | 5（main-a~main-e） |
+| `main-b` | 10（2026-08-11 换绑新 TK 账号，别名沿用） |
 
 代理的账号池接口 `/v1/direct/pool` 一次只认一个 `main_account`（一个主账号一份登录态）。
 批量执行器的 `--main-accounts` 在这之上做合并：按主账号逐个查再拼成一个池，一条命令即可
@@ -351,7 +351,10 @@ python 工具\symphony_video_batch.py submit ... --main-account main-b --account
 面板，OpenCLI 会报「无法切换到 Dreamina Seedance 2.0」——看着像模型问题，其实是账号额度；
 缓存写不成，后续提交就全部返回 `direct_unavailable: reference image(s) are not in the direct
 asset cache`。执行器已按日限标记自动挑选，打印 `WARMUP_SKIP` / `WARMUP_MAIN`；`warmup` 同时
-接受 `--main-account` 与 `--main-accounts`。
+接受 `--main-account` 与 `--main-accounts`。2026-08-08 起「无法切换」自动化处理：执行器当场
+把该「主/子」账号写进 `data\账号限制.json`（打印 `ACCOUNT_LIMITED`）并自动换号重试本批
+（`WARMUP_RETRY`）；不带账号参数时默认候选＝默认主账号打头、其余已登录主账号兜底，候选全部
+用尽才停批。代理侧同时把切号失败的账号与原因写进 `logs\proxy.err.log`，不再只有一行裸 502。
 
 **每个子账号每天 30 条生成上限**（2026-08-01 实测：`main-a` 的 5 个子账号当天各提交 30 条后
 全部返回 `10001114 User Generation Day Limit`）。上限按子账号计，与积分余额无关——余额充足
@@ -390,7 +393,7 @@ curl.exe -X POST "http://127.0.0.1:8765/v1/direct/accounts/main-a/activate?main_
   "account": "4",
   "backend": "direct",
   "prompt": "……",
-  "refs": ["G:\\短剧创作\\……\\角色.jpg"],
+  "refs": [".\\……\\角色.jpg"],
   "mode": "reference",
   "model": "Dreamina Seedance 2.0",
   "duration": 15,

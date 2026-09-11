@@ -26,7 +26,7 @@
     "modulePath": "12306/auth.js",
     "sourceFile": "12306/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -344,7 +344,7 @@
     "modulePath": "12306/auth.js",
     "sourceFile": "12306/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "1688",
@@ -469,7 +469,7 @@
     "modulePath": "1688/auth.js",
     "sourceFile": "1688/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -559,7 +559,7 @@
     "modulePath": "1688/auth.js",
     "sourceFile": "1688/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "1point3acres",
@@ -757,7 +757,7 @@
     "modulePath": "1point3acres/auth.js",
     "sourceFile": "1point3acres/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -946,7 +946,7 @@
     "modulePath": "1point3acres/auth.js",
     "sourceFile": "1point3acres/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "36kr",
@@ -1456,7 +1456,7 @@
     "modulePath": "amazon/auth.js",
     "sourceFile": "amazon/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -1649,7 +1649,7 @@
     "modulePath": "amazon/auth.js",
     "sourceFile": "amazon/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "antigravity",
@@ -3075,7 +3075,7 @@
     "modulePath": "band/auth.js",
     "sourceFile": "band/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -3231,7 +3231,7 @@
     "modulePath": "band/auth.js",
     "sourceFile": "band/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "barchart",
@@ -3938,7 +3938,7 @@
     "modulePath": "bilibili/auth.js",
     "sourceFile": "bilibili/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -4238,7 +4238,7 @@
     "modulePath": "bilibili/auth.js",
     "sourceFile": "bilibili/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "binance",
@@ -5681,7 +5681,7 @@
     "modulePath": "boss/auth.js",
     "sourceFile": "boss/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -5960,7 +5960,7 @@
     "modulePath": "boss/auth.js",
     "sourceFile": "boss/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "brave",
@@ -6144,7 +6144,7 @@
     "modulePath": "chaoxing/auth.js",
     "sourceFile": "chaoxing/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -6166,7 +6166,7 @@
     "modulePath": "chaoxing/auth.js",
     "sourceFile": "chaoxing/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "chatgpt",
@@ -6244,7 +6244,7 @@
     "modulePath": "chatgpt/ask.js",
     "sourceFile": "chatgpt/ask.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "chatgpt",
@@ -6306,7 +6306,7 @@
     "modulePath": "chatgpt/deep-research-result.js",
     "sourceFile": "chatgpt/deep-research-result.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "chatgpt",
@@ -6364,7 +6364,7 @@
     "modulePath": "chatgpt/detail.js",
     "sourceFile": "chatgpt/detail.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "chatgpt",
@@ -6393,7 +6393,7 @@
     "modulePath": "chatgpt/history.js",
     "sourceFile": "chatgpt/history.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "chatgpt",
@@ -6455,7 +6455,7 @@
     "modulePath": "chatgpt/image.js",
     "sourceFile": "chatgpt/image.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "chatgpt",
@@ -6485,7 +6485,7 @@
     "modulePath": "chatgpt/auth.js",
     "sourceFile": "chatgpt/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -6551,7 +6551,7 @@
     "modulePath": "chatgpt/model.js",
     "sourceFile": "chatgpt/model.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "chatgpt",
@@ -6577,7 +6577,7 @@
     "modulePath": "chatgpt/new.js",
     "sourceFile": "chatgpt/new.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "chatgpt",
@@ -6610,7 +6610,7 @@
     "modulePath": "chatgpt/project-file-add.js",
     "sourceFile": "chatgpt/project-file-add.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "chatgpt",
@@ -6639,7 +6639,7 @@
     "modulePath": "chatgpt/project-list.js",
     "sourceFile": "chatgpt/project-list.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "chatgpt",
@@ -6667,7 +6667,7 @@
     "modulePath": "chatgpt/read.js",
     "sourceFile": "chatgpt/read.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "chatgpt",
@@ -6715,7 +6715,7 @@
     "modulePath": "chatgpt/send.js",
     "sourceFile": "chatgpt/send.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "chatgpt",
@@ -6735,7 +6735,7 @@
     "modulePath": "chatgpt/status.js",
     "sourceFile": "chatgpt/status.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "chatgpt",
@@ -6756,7 +6756,7 @@
     "modulePath": "chatgpt/auth.js",
     "sourceFile": "chatgpt/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "chatgpt-app",
@@ -7342,7 +7342,7 @@
     "modulePath": "claude/ask.js",
     "sourceFile": "claude/ask.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "claude",
@@ -7370,7 +7370,7 @@
     "modulePath": "claude/detail.js",
     "sourceFile": "claude/detail.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "claude",
@@ -7399,7 +7399,7 @@
     "modulePath": "claude/history.js",
     "sourceFile": "claude/history.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "claude",
@@ -7430,7 +7430,7 @@
     "modulePath": "claude/auth.js",
     "sourceFile": "claude/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -7449,7 +7449,7 @@
     "modulePath": "claude/new.js",
     "sourceFile": "claude/new.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "claude",
@@ -7469,7 +7469,7 @@
     "modulePath": "claude/read.js",
     "sourceFile": "claude/read.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "claude",
@@ -7504,7 +7504,7 @@
     "modulePath": "claude/send.js",
     "sourceFile": "claude/send.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "claude",
@@ -7524,7 +7524,7 @@
     "modulePath": "claude/status.js",
     "sourceFile": "claude/status.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "claude",
@@ -7546,7 +7546,7 @@
     "modulePath": "claude/auth.js",
     "sourceFile": "claude/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "cnki",
@@ -8679,7 +8679,7 @@
     "modulePath": "coupang/auth.js",
     "sourceFile": "coupang/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -8798,7 +8798,7 @@
     "modulePath": "coupang/auth.js",
     "sourceFile": "coupang/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "crates",
@@ -9065,7 +9065,7 @@
     "modulePath": "ctrip/auth.js",
     "sourceFile": "ctrip/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -9131,7 +9131,7 @@
     "modulePath": "ctrip/auth.js",
     "sourceFile": "ctrip/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "cursor",
@@ -9626,7 +9626,7 @@
     "modulePath": "deepseek/ask.js",
     "sourceFile": "deepseek/ask.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "deepseek",
@@ -9653,7 +9653,7 @@
     "modulePath": "deepseek/detail.js",
     "sourceFile": "deepseek/detail.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "deepseek",
@@ -9681,7 +9681,7 @@
     "modulePath": "deepseek/history.js",
     "sourceFile": "deepseek/history.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "deepseek",
@@ -9711,7 +9711,7 @@
     "modulePath": "deepseek/auth.js",
     "sourceFile": "deepseek/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -9730,7 +9730,7 @@
     "modulePath": "deepseek/new.js",
     "sourceFile": "deepseek/new.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "deepseek",
@@ -9749,7 +9749,7 @@
     "modulePath": "deepseek/read.js",
     "sourceFile": "deepseek/read.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "deepseek",
@@ -9790,7 +9790,7 @@
     "modulePath": "deepseek/send.js",
     "sourceFile": "deepseek/send.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "deepseek",
@@ -9810,7 +9810,7 @@
     "modulePath": "deepseek/status.js",
     "sourceFile": "deepseek/status.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "deepseek",
@@ -9831,7 +9831,7 @@
     "modulePath": "deepseek/auth.js",
     "sourceFile": "deepseek/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "defillama",
@@ -10123,7 +10123,7 @@
     "modulePath": "dianping/auth.js",
     "sourceFile": "dianping/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -10220,7 +10220,7 @@
     "modulePath": "dianping/auth.js",
     "sourceFile": "dianping/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "dictionary",
@@ -11036,7 +11036,7 @@
     "modulePath": "douban/auth.js",
     "sourceFile": "douban/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -11364,7 +11364,7 @@
     "modulePath": "douban/auth.js",
     "sourceFile": "douban/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "doubao",
@@ -11398,7 +11398,7 @@
     "modulePath": "doubao/ask.js",
     "sourceFile": "doubao/ask.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "doubao",
@@ -11425,7 +11425,7 @@
     "modulePath": "doubao/detail.js",
     "sourceFile": "doubao/detail.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "doubao",
@@ -11454,7 +11454,7 @@
     "modulePath": "doubao/history.js",
     "sourceFile": "doubao/history.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "doubao",
@@ -11484,7 +11484,7 @@
     "modulePath": "doubao/auth.js",
     "sourceFile": "doubao/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -11519,7 +11519,7 @@
     "modulePath": "doubao/meeting-summary.js",
     "sourceFile": "doubao/meeting-summary.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "doubao",
@@ -11553,7 +11553,7 @@
     "modulePath": "doubao/meeting-transcript.js",
     "sourceFile": "doubao/meeting-transcript.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "doubao",
@@ -11572,7 +11572,7 @@
     "modulePath": "doubao/new.js",
     "sourceFile": "doubao/new.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "doubao",
@@ -11591,7 +11591,7 @@
     "modulePath": "doubao/read.js",
     "sourceFile": "doubao/read.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "doubao",
@@ -11619,7 +11619,7 @@
     "modulePath": "doubao/send.js",
     "sourceFile": "doubao/send.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "doubao",
@@ -11640,7 +11640,7 @@
     "modulePath": "doubao/status.js",
     "sourceFile": "doubao/status.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "doubao",
@@ -11661,7 +11661,7 @@
     "modulePath": "doubao/auth.js",
     "sourceFile": "doubao/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "doubao-app",
@@ -11889,7 +11889,7 @@
     "modulePath": "douyin/delete.js",
     "sourceFile": "douyin/delete.js",
     "navigateBefore": "https://creator.douyin.com",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "douyin",
@@ -12093,7 +12093,7 @@
     "modulePath": "douyin/auth.js",
     "sourceFile": "douyin/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -12465,7 +12465,7 @@
     "modulePath": "douyin/auth.js",
     "sourceFile": "douyin/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "duckduckgo",
@@ -13349,7 +13349,7 @@
     "modulePath": "facebook/auth.js",
     "sourceFile": "facebook/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -13556,7 +13556,7 @@
     "modulePath": "facebook/auth.js",
     "sourceFile": "facebook/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "flathub",
@@ -13664,7 +13664,7 @@
     "modulePath": "flomo/auth.js",
     "sourceFile": "flomo/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -13729,7 +13729,7 @@
     "modulePath": "flomo/auth.js",
     "sourceFile": "flomo/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "gemini",
@@ -13783,7 +13783,7 @@
     "modulePath": "gemini/ask.js",
     "sourceFile": "gemini/ask.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "gemini",
@@ -13830,7 +13830,7 @@
     "modulePath": "gemini/deep-research.js",
     "sourceFile": "gemini/deep-research.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "gemini",
@@ -13875,7 +13875,7 @@
     "modulePath": "gemini/deep-research-result.js",
     "sourceFile": "gemini/deep-research-result.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "gemini",
@@ -13903,7 +13903,7 @@
     "modulePath": "gemini/detail.js",
     "sourceFile": "gemini/detail.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "gemini",
@@ -13932,7 +13932,7 @@
     "modulePath": "gemini/history.js",
     "sourceFile": "gemini/history.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "gemini",
@@ -13996,7 +13996,7 @@
     "modulePath": "gemini/image.js",
     "sourceFile": "gemini/image.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "gemini",
@@ -14025,7 +14025,7 @@
     "modulePath": "gemini/auth.js",
     "sourceFile": "gemini/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -14045,7 +14045,7 @@
     "modulePath": "gemini/models.js",
     "sourceFile": "gemini/models.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "gemini",
@@ -14064,7 +14064,7 @@
     "modulePath": "gemini/new.js",
     "sourceFile": "gemini/new.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "gemini",
@@ -14084,7 +14084,7 @@
     "modulePath": "gemini/read.js",
     "sourceFile": "gemini/read.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "gemini",
@@ -14104,7 +14104,7 @@
     "modulePath": "gemini/status.js",
     "sourceFile": "gemini/status.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "gemini",
@@ -14124,7 +14124,7 @@
     "modulePath": "gemini/auth.js",
     "sourceFile": "gemini/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "geogebra",
@@ -14426,7 +14426,7 @@
     "modulePath": "gitee/auth.js",
     "sourceFile": "gitee/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -14537,7 +14537,7 @@
     "modulePath": "gitee/auth.js",
     "sourceFile": "gitee/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "github",
@@ -14569,7 +14569,7 @@
     "modulePath": "github/auth.js",
     "sourceFile": "github/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -14593,7 +14593,7 @@
     "modulePath": "github/auth.js",
     "sourceFile": "github/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "github-trending",
@@ -14875,7 +14875,7 @@
     "modulePath": "google-flow/asset-options.js",
     "sourceFile": "google-flow/asset-options.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "background"
   },
   {
@@ -14903,7 +14903,7 @@
     "modulePath": "google-flow/composer-options.js",
     "sourceFile": "google-flow/composer-options.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "background"
   },
   {
@@ -14956,7 +14956,7 @@
     "modulePath": "google-flow/download-image.js",
     "sourceFile": "google-flow/download-image.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "background"
   },
   {
@@ -14993,7 +14993,7 @@
     "modulePath": "google-flow/force-submit-current.js",
     "sourceFile": "google-flow/force-submit-current.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "background"
   },
   {
@@ -15070,7 +15070,7 @@
     "modulePath": "google-flow/generate-image.js",
     "sourceFile": "google-flow/generate-image.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "background"
   },
   {
@@ -15094,7 +15094,7 @@
     "modulePath": "google-flow/prepared-state.js",
     "sourceFile": "google-flow/prepared-state.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "background"
   },
   {
@@ -15117,7 +15117,7 @@
     "modulePath": "google-flow/protocol-probe.js",
     "sourceFile": "google-flow/protocol-probe.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "background"
   },
   {
@@ -15170,7 +15170,7 @@
     "modulePath": "google-flow/submit-current.js",
     "sourceFile": "google-flow/submit-current.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "background"
   },
   {
@@ -15530,7 +15530,7 @@
     "modulePath": "grok/ask.js",
     "sourceFile": "grok/ask.js",
     "navigateBefore": "https://grok.com",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "grok",
@@ -15564,7 +15564,7 @@
     "modulePath": "grok/delete.js",
     "sourceFile": "grok/delete.js",
     "navigateBefore": "https://grok.com",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "grok",
@@ -15598,7 +15598,7 @@
     "modulePath": "grok/detail.js",
     "sourceFile": "grok/detail.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "grok",
@@ -15636,7 +15636,7 @@
     "modulePath": "grok/export.js",
     "sourceFile": "grok/export.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "grok",
@@ -15720,7 +15720,7 @@
     "modulePath": "grok/export-all.js",
     "sourceFile": "grok/export-all.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "grok",
@@ -15748,7 +15748,7 @@
     "modulePath": "grok/history.js",
     "sourceFile": "grok/history.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "grok",
@@ -15805,7 +15805,7 @@
     "modulePath": "grok/image.js",
     "sourceFile": "grok/image.js",
     "navigateBefore": "https://grok.com",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "grok",
@@ -15835,7 +15835,7 @@
     "modulePath": "grok/auth.js",
     "sourceFile": "grok/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -15854,7 +15854,7 @@
     "modulePath": "grok/new.js",
     "sourceFile": "grok/new.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "grok",
@@ -15881,7 +15881,7 @@
     "modulePath": "grok/pin.js",
     "sourceFile": "grok/pin.js",
     "navigateBefore": "https://grok.com",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "grok",
@@ -15908,7 +15908,7 @@
     "modulePath": "grok/read.js",
     "sourceFile": "grok/read.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "grok",
@@ -15942,7 +15942,7 @@
     "modulePath": "grok/send.js",
     "sourceFile": "grok/send.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "grok",
@@ -15964,7 +15964,7 @@
     "modulePath": "grok/status.js",
     "sourceFile": "grok/status.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "grok",
@@ -15991,7 +15991,7 @@
     "modulePath": "grok/pin.js",
     "sourceFile": "grok/pin.js",
     "navigateBefore": "https://grok.com",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "grok",
@@ -16012,7 +16012,7 @@
     "modulePath": "grok/auth.js",
     "sourceFile": "grok/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "guazi",
@@ -16463,7 +16463,7 @@
     "modulePath": "hf/auth.js",
     "sourceFile": "hf/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -16672,7 +16672,7 @@
     "modulePath": "hf/auth.js",
     "sourceFile": "hf/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "higgsfield",
@@ -16743,7 +16743,7 @@
     "modulePath": "higgsfield/composer-options.js",
     "sourceFile": "higgsfield/composer-options.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "background"
   },
   {
@@ -16859,7 +16859,7 @@
     "modulePath": "higgsfield/generate-video.js",
     "sourceFile": "higgsfield/generate-video.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "background"
   },
   {
@@ -16927,7 +16927,7 @@
     "modulePath": "higgsfield/jobs.js",
     "sourceFile": "higgsfield/jobs.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "background"
   },
   {
@@ -16959,7 +16959,7 @@
     "modulePath": "higgsfield/auth.js",
     "sourceFile": "higgsfield/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -16982,7 +16982,7 @@
     "modulePath": "higgsfield/auth.js",
     "sourceFile": "higgsfield/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "hltv",
@@ -18212,7 +18212,7 @@
     "modulePath": "hupu/auth.js",
     "sourceFile": "hupu/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -18425,7 +18425,7 @@
     "modulePath": "hupu/auth.js",
     "sourceFile": "hupu/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "imdb",
@@ -19032,7 +19032,7 @@
     "modulePath": "instagram/auth.js",
     "sourceFile": "instagram/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -19474,7 +19474,7 @@
     "modulePath": "instagram/auth.js",
     "sourceFile": "instagram/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "jd",
@@ -19630,7 +19630,7 @@
     "modulePath": "jd/auth.js",
     "sourceFile": "jd/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -19724,7 +19724,7 @@
     "modulePath": "jd/auth.js",
     "sourceFile": "jd/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "jianyu",
@@ -19791,7 +19791,7 @@
     "modulePath": "jianyu/auth.js",
     "sourceFile": "jianyu/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -19858,7 +19858,7 @@
     "modulePath": "jianyu/auth.js",
     "sourceFile": "jianyu/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "jike",
@@ -20005,7 +20005,7 @@
     "modulePath": "jike/auth.js",
     "sourceFile": "jike/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -20231,7 +20231,7 @@
     "modulePath": "jike/auth.js",
     "sourceFile": "jike/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "jimeng",
@@ -20332,7 +20332,7 @@
     "modulePath": "jimeng/auth.js",
     "sourceFile": "jimeng/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -20372,7 +20372,7 @@
     "modulePath": "jimeng/auth.js",
     "sourceFile": "jimeng/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "jimeng",
@@ -20774,7 +20774,7 @@
     "modulePath": "ke/auth.js",
     "sourceFile": "ke/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -20795,7 +20795,7 @@
     "modulePath": "ke/auth.js",
     "sourceFile": "ke/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "ke",
@@ -20917,7 +20917,7 @@
     "modulePath": "kimi/ui.js",
     "sourceFile": "kimi/ui.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -20963,7 +20963,7 @@
     "modulePath": "kimi/chat.js",
     "sourceFile": "kimi/chat.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -20989,7 +20989,7 @@
     "modulePath": "kimi/storage.js",
     "sourceFile": "kimi/storage.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21034,7 +21034,7 @@
     "modulePath": "kimi/chat.js",
     "sourceFile": "kimi/chat.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21080,7 +21080,7 @@
     "modulePath": "kimi/chat.js",
     "sourceFile": "kimi/chat.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21103,7 +21103,7 @@
     "modulePath": "kimi/audit-extras.js",
     "sourceFile": "kimi/audit-extras.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21142,7 +21142,7 @@
     "modulePath": "kimi/chat.js",
     "sourceFile": "kimi/chat.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21187,7 +21187,7 @@
     "modulePath": "kimi/audit-extras.js",
     "sourceFile": "kimi/audit-extras.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21213,7 +21213,7 @@
     "modulePath": "kimi/storage.js",
     "sourceFile": "kimi/storage.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21243,7 +21243,7 @@
     "modulePath": "kimi/auth.js",
     "sourceFile": "kimi/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -21277,7 +21277,7 @@
     "modulePath": "kimi/ui.js",
     "sourceFile": "kimi/ui.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21316,7 +21316,7 @@
     "modulePath": "kimi/ui.js",
     "sourceFile": "kimi/ui.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21347,7 +21347,7 @@
     "modulePath": "kimi/chat.js",
     "sourceFile": "kimi/chat.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21392,7 +21392,7 @@
     "modulePath": "kimi/chat.js",
     "sourceFile": "kimi/chat.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21437,7 +21437,7 @@
     "modulePath": "kimi/chat.js",
     "sourceFile": "kimi/chat.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21475,7 +21475,7 @@
     "modulePath": "kimi/chat.js",
     "sourceFile": "kimi/chat.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21514,7 +21514,7 @@
     "modulePath": "kimi/chat.js",
     "sourceFile": "kimi/chat.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21539,7 +21539,7 @@
     "modulePath": "kimi/ui.js",
     "sourceFile": "kimi/ui.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21577,7 +21577,7 @@
     "modulePath": "kimi/chat.js",
     "sourceFile": "kimi/chat.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21602,7 +21602,7 @@
     "modulePath": "kimi/ui.js",
     "sourceFile": "kimi/ui.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21633,7 +21633,7 @@
     "modulePath": "kimi/audit-extras.js",
     "sourceFile": "kimi/audit-extras.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21664,7 +21664,7 @@
     "modulePath": "kimi/chat.js",
     "sourceFile": "kimi/chat.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21712,7 +21712,7 @@
     "modulePath": "kimi/storage.js",
     "sourceFile": "kimi/storage.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21759,7 +21759,7 @@
     "modulePath": "kimi/storage.js",
     "sourceFile": "kimi/storage.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21796,7 +21796,7 @@
     "modulePath": "kimi/audit-extras.js",
     "sourceFile": "kimi/audit-extras.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21819,7 +21819,7 @@
     "modulePath": "kimi/audit-extras.js",
     "sourceFile": "kimi/audit-extras.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21844,7 +21844,7 @@
     "modulePath": "kimi/usage.js",
     "sourceFile": "kimi/usage.js",
     "navigateBefore": true,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21869,7 +21869,7 @@
     "modulePath": "kimi/ui.js",
     "sourceFile": "kimi/ui.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "kimi",
@@ -21890,7 +21890,7 @@
     "modulePath": "kimi/auth.js",
     "sourceFile": "kimi/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "lesswrong",
@@ -22666,7 +22666,7 @@
     "modulePath": "linkedin/auth.js",
     "sourceFile": "linkedin/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -23443,7 +23443,7 @@
     "modulePath": "linkedin/auth.js",
     "sourceFile": "linkedin/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "linkedin-learning",
@@ -23508,7 +23508,7 @@
     "modulePath": "linkedin-learning/auth.js",
     "sourceFile": "linkedin-learning/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -23603,7 +23603,7 @@
     "modulePath": "linkedin-learning/auth.js",
     "sourceFile": "linkedin-learning/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "linux-do",
@@ -23763,7 +23763,7 @@
     "modulePath": "linux-do/auth.js",
     "sourceFile": "linux-do/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -23988,7 +23988,7 @@
     "modulePath": "linux-do/auth.js",
     "sourceFile": "linux-do/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "lobsters",
@@ -24249,7 +24249,7 @@
     "modulePath": "maimai/auth.js",
     "sourceFile": "maimai/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -24396,7 +24396,7 @@
     "modulePath": "maimai/auth.js",
     "sourceFile": "maimai/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "manus",
@@ -24424,7 +24424,7 @@
     "modulePath": "manus/connectors.js",
     "sourceFile": "manus/connectors.js",
     "navigateBefore": true,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "manus",
@@ -24443,7 +24443,7 @@
     "modulePath": "manus/credits.js",
     "sourceFile": "manus/credits.js",
     "navigateBefore": true,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "manus",
@@ -24481,7 +24481,7 @@
     "modulePath": "manus/list.js",
     "sourceFile": "manus/list.js",
     "navigateBefore": true,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "manus",
@@ -24511,7 +24511,7 @@
     "modulePath": "manus/auth.js",
     "sourceFile": "manus/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -24539,7 +24539,7 @@
     "modulePath": "manus/read.js",
     "sourceFile": "manus/read.js",
     "navigateBefore": true,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "manus",
@@ -24560,7 +24560,7 @@
     "modulePath": "manus/skills.js",
     "sourceFile": "manus/skills.js",
     "navigateBefore": true,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "manus",
@@ -24579,7 +24579,7 @@
     "modulePath": "manus/status.js",
     "sourceFile": "manus/status.js",
     "navigateBefore": true,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "manus",
@@ -24600,7 +24600,7 @@
     "modulePath": "manus/auth.js",
     "sourceFile": "manus/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "maven",
@@ -24893,7 +24893,7 @@
     "modulePath": "mercury/check-login.js",
     "sourceFile": "mercury/check-login.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -24979,7 +24979,7 @@
     "modulePath": "mercury/reimbursement-draft.js",
     "sourceFile": "mercury/reimbursement-draft.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -25574,7 +25574,7 @@
     "modulePath": "notebooklm/auth.js",
     "sourceFile": "notebooklm/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -25836,7 +25836,7 @@
     "modulePath": "notebooklm/auth.js",
     "sourceFile": "notebooklm/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "notebooklm",
@@ -26083,7 +26083,7 @@
     "modulePath": "nowcoder/auth.js",
     "sourceFile": "nowcoder/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -26443,7 +26443,7 @@
     "modulePath": "nowcoder/auth.js",
     "sourceFile": "nowcoder/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "npm",
@@ -27872,7 +27872,7 @@
     "modulePath": "pixiv/auth.js",
     "sourceFile": "pixiv/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -28057,7 +28057,7 @@
     "modulePath": "pixiv/auth.js",
     "sourceFile": "pixiv/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "powerchina",
@@ -28086,7 +28086,7 @@
     "modulePath": "powerchina/auth.js",
     "sourceFile": "powerchina/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -28145,7 +28145,7 @@
     "modulePath": "powerchina/auth.js",
     "sourceFile": "powerchina/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "producthunt",
@@ -29364,7 +29364,7 @@
     "modulePath": "quark/auth.js",
     "sourceFile": "quark/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -29662,7 +29662,7 @@
     "modulePath": "quark/auth.js",
     "sourceFile": "quark/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "qwen",
@@ -29725,7 +29725,7 @@
     "modulePath": "qwen/ask.js",
     "sourceFile": "qwen/ask.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "qwen",
@@ -29759,7 +29759,7 @@
     "modulePath": "qwen/detail.js",
     "sourceFile": "qwen/detail.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "qwen",
@@ -29788,7 +29788,7 @@
     "modulePath": "qwen/history.js",
     "sourceFile": "qwen/history.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "qwen",
@@ -29845,7 +29845,7 @@
     "modulePath": "qwen/image.js",
     "sourceFile": "qwen/image.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "qwen",
@@ -29875,7 +29875,7 @@
     "modulePath": "qwen/auth.js",
     "sourceFile": "qwen/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -29894,7 +29894,7 @@
     "modulePath": "qwen/new.js",
     "sourceFile": "qwen/new.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "qwen",
@@ -29921,7 +29921,7 @@
     "modulePath": "qwen/read.js",
     "sourceFile": "qwen/read.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "qwen",
@@ -29969,7 +29969,7 @@
     "modulePath": "qwen/send.js",
     "sourceFile": "qwen/send.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "qwen",
@@ -29991,7 +29991,7 @@
     "modulePath": "qwen/status.js",
     "sourceFile": "qwen/status.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "qwen",
@@ -30012,7 +30012,7 @@
     "modulePath": "qwen/auth.js",
     "sourceFile": "qwen/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "reddit",
@@ -30188,7 +30188,7 @@
     "modulePath": "reddit/auth.js",
     "sourceFile": "reddit/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -30933,7 +30933,7 @@
     "modulePath": "rednote/auth.js",
     "sourceFile": "rednote/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -31092,7 +31092,7 @@
     "modulePath": "rednote/auth.js",
     "sourceFile": "rednote/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "rest-countries",
@@ -31257,7 +31257,7 @@
     "modulePath": "reuters/auth.js",
     "sourceFile": "reuters/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -31317,7 +31317,7 @@
     "modulePath": "reuters/auth.js",
     "sourceFile": "reuters/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "rfc",
@@ -31884,7 +31884,7 @@
     "modulePath": "slock/attachment-download.js",
     "sourceFile": "slock/attachment-download.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -31926,7 +31926,7 @@
     "modulePath": "slock/attachment-upload.js",
     "sourceFile": "slock/attachment-upload.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -31960,7 +31960,7 @@
     "modulePath": "slock/attachment-url.js",
     "sourceFile": "slock/attachment-url.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -31993,7 +31993,7 @@
     "modulePath": "slock/bookmark-add.js",
     "sourceFile": "slock/bookmark-add.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32035,7 +32035,7 @@
     "modulePath": "slock/bookmark-list.js",
     "sourceFile": "slock/bookmark-list.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32069,7 +32069,7 @@
     "modulePath": "slock/bookmark-remove.js",
     "sourceFile": "slock/bookmark-remove.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32104,7 +32104,7 @@
     "modulePath": "slock/channel-archive.js",
     "sourceFile": "slock/channel-archive.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32152,7 +32152,7 @@
     "modulePath": "slock/channel-create.js",
     "sourceFile": "slock/channel-create.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32196,7 +32196,7 @@
     "modulePath": "slock/channel-files.js",
     "sourceFile": "slock/channel-files.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32233,7 +32233,7 @@
     "modulePath": "slock/channel-info.js",
     "sourceFile": "slock/channel-info.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32268,7 +32268,7 @@
     "modulePath": "slock/channel-join.js",
     "sourceFile": "slock/channel-join.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32303,7 +32303,7 @@
     "modulePath": "slock/channel-leave.js",
     "sourceFile": "slock/channel-leave.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32330,7 +32330,7 @@
     "modulePath": "slock/channel-list.js",
     "sourceFile": "slock/channel-list.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32377,7 +32377,7 @@
     "modulePath": "slock/channel-mark.js",
     "sourceFile": "slock/channel-mark.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32412,7 +32412,7 @@
     "modulePath": "slock/channel-members.js",
     "sourceFile": "slock/channel-members.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32447,7 +32447,7 @@
     "modulePath": "slock/channel-unarchive.js",
     "sourceFile": "slock/channel-unarchive.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32475,7 +32475,7 @@
     "modulePath": "slock/dm-list.js",
     "sourceFile": "slock/dm-list.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32527,7 +32527,7 @@
     "modulePath": "slock/inbox.js",
     "sourceFile": "slock/inbox.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32560,7 +32560,7 @@
     "modulePath": "slock/inbox-done.js",
     "sourceFile": "slock/inbox-done.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32586,7 +32586,7 @@
     "modulePath": "slock/inbox-read-all.js",
     "sourceFile": "slock/inbox-read-all.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32617,7 +32617,7 @@
     "modulePath": "slock/whoami.js",
     "sourceFile": "slock/whoami.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -32684,7 +32684,7 @@
     "modulePath": "slock/message-read.js",
     "sourceFile": "slock/message-read.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32733,7 +32733,7 @@
     "modulePath": "slock/message-search.js",
     "sourceFile": "slock/message-search.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32796,7 +32796,7 @@
     "modulePath": "slock/message-send.js",
     "sourceFile": "slock/message-send.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32837,7 +32837,7 @@
     "modulePath": "slock/reaction-add.js",
     "sourceFile": "slock/reaction-add.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32878,7 +32878,7 @@
     "modulePath": "slock/reaction-remove.js",
     "sourceFile": "slock/reaction-remove.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32899,7 +32899,7 @@
     "modulePath": "slock/server-list.js",
     "sourceFile": "slock/server-list.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32928,7 +32928,7 @@
     "modulePath": "slock/server-use.js",
     "sourceFile": "slock/server-use.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32963,7 +32963,7 @@
     "modulePath": "slock/task-claim.js",
     "sourceFile": "slock/task-claim.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -32999,7 +32999,7 @@
     "modulePath": "slock/task-convert.js",
     "sourceFile": "slock/task-convert.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -33048,7 +33048,7 @@
     "modulePath": "slock/task-create.js",
     "sourceFile": "slock/task-create.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -33088,7 +33088,7 @@
     "modulePath": "slock/task-delete.js",
     "sourceFile": "slock/task-delete.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -33131,7 +33131,7 @@
     "modulePath": "slock/task-get.js",
     "sourceFile": "slock/task-get.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -33173,7 +33173,7 @@
     "modulePath": "slock/task-list.js",
     "sourceFile": "slock/task-list.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -33209,7 +33209,7 @@
     "modulePath": "slock/task-list-server.js",
     "sourceFile": "slock/task-list-server.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -33251,7 +33251,7 @@
     "modulePath": "slock/task-status.js",
     "sourceFile": "slock/task-status.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -33286,7 +33286,7 @@
     "modulePath": "slock/task-unclaim.js",
     "sourceFile": "slock/task-unclaim.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -33319,7 +33319,7 @@
     "modulePath": "slock/thread-done.js",
     "sourceFile": "slock/thread-done.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -33353,7 +33353,7 @@
     "modulePath": "slock/thread-follow.js",
     "sourceFile": "slock/thread-follow.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -33383,7 +33383,7 @@
     "modulePath": "slock/thread-list.js",
     "sourceFile": "slock/thread-list.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -33416,7 +33416,7 @@
     "modulePath": "slock/thread-undone.js",
     "sourceFile": "slock/thread-undone.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -33449,7 +33449,7 @@
     "modulePath": "slock/thread-unfollow.js",
     "sourceFile": "slock/thread-unfollow.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -33470,7 +33470,7 @@
     "modulePath": "slock/unread-summary.js",
     "sourceFile": "slock/unread-summary.js",
     "navigateBefore": "https://app.slock.ai",
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "slock",
@@ -33492,7 +33492,7 @@
     "modulePath": "slock/whoami.js",
     "sourceFile": "slock/whoami.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "smzdm",
@@ -34396,7 +34396,7 @@
     "modulePath": "suno/download.js",
     "sourceFile": "suno/download.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "suno",
@@ -34509,7 +34509,7 @@
     "modulePath": "suno/generate.js",
     "sourceFile": "suno/generate.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "suno",
@@ -34547,7 +34547,7 @@
     "modulePath": "suno/list.js",
     "sourceFile": "suno/list.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "suno",
@@ -34577,7 +34577,7 @@
     "modulePath": "suno/auth.js",
     "sourceFile": "suno/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -34600,7 +34600,7 @@
     "modulePath": "suno/status.js",
     "sourceFile": "suno/status.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "suno",
@@ -34621,7 +34621,7 @@
     "modulePath": "suno/auth.js",
     "sourceFile": "suno/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "taobao",
@@ -34748,7 +34748,7 @@
     "modulePath": "taobao/auth.js",
     "sourceFile": "taobao/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -34857,7 +34857,7 @@
     "modulePath": "taobao/auth.js",
     "sourceFile": "taobao/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "tdx",
@@ -35366,7 +35366,7 @@
     "modulePath": "tiktok/auth.js",
     "sourceFile": "tiktok/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -35653,7 +35653,7 @@
     "modulePath": "tiktok/auth.js",
     "sourceFile": "tiktok/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "tiktok-symphony",
@@ -35814,7 +35814,7 @@
     "modulePath": "tiktok-symphony/direct-session.js",
     "sourceFile": "tiktok-symphony/direct-session.js",
     "navigateBefore": "https://ads.tiktok.com/creative/creativestudio/image-to-video?subApp=CreativeStudio/ImageGeneration/I2VImageGeneration",
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "background"
   },
   {
@@ -36011,7 +36011,7 @@
     "modulePath": "tiktok-symphony/generate-video.js",
     "sourceFile": "tiktok-symphony/generate-video.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "background"
   },
   {
@@ -36180,7 +36180,7 @@
     "modulePath": "toutiao/auth.js",
     "sourceFile": "toutiao/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -36242,7 +36242,7 @@
     "modulePath": "toutiao/auth.js",
     "sourceFile": "toutiao/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "trae-cn",
@@ -38606,7 +38606,7 @@
     "modulePath": "twitter/auth.js",
     "sourceFile": "twitter/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -39323,7 +39323,7 @@
     "modulePath": "twitter/auth.js",
     "sourceFile": "twitter/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "uisdc",
@@ -39554,7 +39554,7 @@
     "modulePath": "upwork/auth.js",
     "sourceFile": "upwork/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -39647,7 +39647,7 @@
     "modulePath": "upwork/auth.js",
     "sourceFile": "upwork/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "v2ex",
@@ -39752,7 +39752,7 @@
     "modulePath": "v2ex/auth.js",
     "sourceFile": "v2ex/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -40011,7 +40011,7 @@
     "modulePath": "v2ex/auth.js",
     "sourceFile": "v2ex/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "wanfang",
@@ -40172,7 +40172,7 @@
     "modulePath": "wechat-channels/auth.js",
     "sourceFile": "wechat-channels/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -40260,7 +40260,7 @@
     "modulePath": "wechat-channels/auth.js",
     "sourceFile": "wechat-channels/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "weibo",
@@ -40460,7 +40460,7 @@
     "modulePath": "weibo/auth.js",
     "sourceFile": "weibo/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -40697,7 +40697,7 @@
     "modulePath": "weibo/auth.js",
     "sourceFile": "weibo/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "weixin",
@@ -41069,7 +41069,7 @@
     "modulePath": "weread/auth.js",
     "sourceFile": "weread/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -41246,7 +41246,7 @@
     "modulePath": "weread/auth.js",
     "sourceFile": "weread/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "weread-official",
@@ -42117,7 +42117,7 @@
     "modulePath": "xianyu/auth.js",
     "sourceFile": "xianyu/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -42383,7 +42383,7 @@
     "modulePath": "xianyu/auth.js",
     "sourceFile": "xianyu/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "xiaoe",
@@ -42521,7 +42521,7 @@
     "modulePath": "xiaoe/auth.js",
     "sourceFile": "xiaoe/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -42572,7 +42572,7 @@
     "modulePath": "xiaoe/auth.js",
     "sourceFile": "xiaoe/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "xiaohongshu",
@@ -43159,7 +43159,7 @@
     "modulePath": "xiaohongshu/auth.js",
     "sourceFile": "xiaohongshu/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -43444,7 +43444,7 @@
     "modulePath": "xiaohongshu/auth.js",
     "sourceFile": "xiaohongshu/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "xiaoyuzhou",
@@ -43943,7 +43943,7 @@
     "modulePath": "xueqiu/auth.js",
     "sourceFile": "xueqiu/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -44065,7 +44065,7 @@
     "modulePath": "xueqiu/auth.js",
     "sourceFile": "xueqiu/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "yahoo",
@@ -44960,7 +44960,7 @@
     "modulePath": "youtube/auth.js",
     "sourceFile": "youtube/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -45277,7 +45277,7 @@
     "modulePath": "youtube/auth.js",
     "sourceFile": "youtube/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "yuanbao",
@@ -45326,7 +45326,7 @@
     "modulePath": "yuanbao/ask.js",
     "sourceFile": "yuanbao/ask.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "yuanbao",
@@ -45353,7 +45353,7 @@
     "modulePath": "yuanbao/detail.js",
     "sourceFile": "yuanbao/detail.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "yuanbao",
@@ -45383,7 +45383,7 @@
     "modulePath": "yuanbao/history.js",
     "sourceFile": "yuanbao/history.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "yuanbao",
@@ -45413,7 +45413,7 @@
     "modulePath": "yuanbao/auth.js",
     "sourceFile": "yuanbao/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -45433,7 +45433,7 @@
     "modulePath": "yuanbao/new.js",
     "sourceFile": "yuanbao/new.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "yuanbao",
@@ -45452,7 +45452,7 @@
     "modulePath": "yuanbao/read.js",
     "sourceFile": "yuanbao/read.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "yuanbao",
@@ -45486,7 +45486,7 @@
     "modulePath": "yuanbao/send.js",
     "sourceFile": "yuanbao/send.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "yuanbao",
@@ -45510,7 +45510,7 @@
     "modulePath": "yuanbao/status.js",
     "sourceFile": "yuanbao/status.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "yuanbao",
@@ -45531,7 +45531,7 @@
     "modulePath": "yuanbao/auth.js",
     "sourceFile": "yuanbao/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "zhihu",
@@ -46091,7 +46091,7 @@
     "modulePath": "zhihu/auth.js",
     "sourceFile": "zhihu/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -46388,7 +46388,7 @@
     "modulePath": "zhihu/auth.js",
     "sourceFile": "zhihu/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   },
   {
     "site": "zlibrary",
@@ -46543,7 +46543,7 @@
     "modulePath": "zsxq/auth.js",
     "sourceFile": "zsxq/auth.js",
     "navigateBefore": false,
-    "siteSession": "",
+    "siteSession": "persistent",
     "defaultWindowMode": "foreground"
   },
   {
@@ -46693,6 +46693,6 @@
     "modulePath": "zsxq/auth.js",
     "sourceFile": "zsxq/auth.js",
     "navigateBefore": false,
-    "siteSession": ""
+    "siteSession": "persistent"
   }
 ]

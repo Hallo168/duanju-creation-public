@@ -5026,5 +5026,3 @@ class FlowClient:
         except Exception as e:
             debug_logger.log_error(f"[reCAPTCHA {method}] error: {str(e)}")
             return None
-
-

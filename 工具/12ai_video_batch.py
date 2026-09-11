@@ -19,7 +19,15 @@ import urllib.parse
 import urllib.request
 from pathlib import Path
 
-from canvas_video_batch import load_video_provider_config, mount_tokens, parse_units, unit_section, video_prompt
+from canvas_video_batch import (
+    load_video_provider_config,
+    mount_tokens,
+    parse_units,
+    resolve_mount,
+    unit_section,
+    video_prompt,
+)
+from video_reference_utils import imgbb_key, imgbb_upload, load_cache
 from video_provider_catalog import video_model_rows
 
 
@@ -124,23 +132,114 @@ def append_ledger(path: Path, entry: dict) -> None:
         os.fsync(handle.fileno())
 
 
+def require_current_model(provider: dict, token: str, model: str) -> None:
+    names = model_names(video_model_rows(api_json(endpoint(provider, "models"), token, timeout=30)))
+    if model not in names:
+        raise RuntimeError("当前 12AI 模型表不包含用户确认的完整模型名，停止操作")
+
+
+def local_reference_paths(
+    story_root: Path,
+    prompt_file: str,
+    units: list[int],
+    partial: bool,
+) -> dict[int, list[Path]]:
+    markdown = (story_root / prompt_file).read_text(encoding="utf-8")
+    if not re.search(r"(?m)^(?:fenjing_ready|grids_ready):\s*true\s*$", markdown) and not partial:
+        raise RuntimeError("fenjing_ready 不是 true（老集为 grids_ready）；仅用户明确点名放行部分单元时可加 --allow-partial-grids")
+    result: dict[int, list[Path]] = {}
+    for unit in units:
+        section = unit_section(markdown, unit)
+        prompt = video_prompt(section, unit)
+        mounts = mount_tokens(section, unit)
+        paths = [resolve_mount(story_root, token, unit) for token in mounts]
+        for path in paths:
+            if not path.is_file() or path.stat().st_size == 0:
+                raise FileNotFoundError(path)
+        used_indexes = [int(value) for value in re.findall(r"图片(\d+)", prompt)]
+        if used_indexes and max(used_indexes) > len(paths):
+            raise ValueError(
+                f"单元{unit}图片编号超过挂载数: max={max(used_indexes)}, mounts={len(paths)}"
+            )
+        result[unit] = paths
+    return result
+
+
+def auto_public_references(
+    paths_by_unit: dict[int, list[Path]],
+    cache_path: Path,
+) -> dict[str, list[str]]:
+    key = imgbb_key()
+    cache = load_cache(cache_path)
+    unique_paths = sorted({path for paths in paths_by_unit.values() for path in paths}, key=str)
+    urls = {path: imgbb_upload(path, key, cache, cache_path) for path in unique_paths}
+    return {str(unit): [urls[path] for path in paths] for unit, paths in paths_by_unit.items()}
+
+
+def preflight(args: argparse.Namespace) -> int:
+    provider = config()["providers"][PROVIDER_NAME]
+    token, base_url = load_video_provider_config(PROVIDER_NAME, ENV_NAME, DEFAULT_BASE_URL)
+    base_url = (args.base_url or base_url).rstrip("/")
+    require_current_model(provider, token, args.model)
+    story_root = Path(args.story_root).resolve()
+    units = parse_units(args.units)
+    if args.reference_urls:
+        refs_by_unit = json.loads(Path(args.reference_urls).read_text(encoding="utf-8-sig"))
+        prepared_units(story_root, args.prompt_file, units, refs_by_unit, args.allow_partial_grids)
+    elif args.auto_public_refs:
+        imgbb_key()
+        paths_by_unit = local_reference_paths(
+            story_root,
+            args.prompt_file,
+            units,
+            args.allow_partial_grids,
+        )
+        markdown = (story_root / args.prompt_file).read_text(encoding="utf-8")
+        for unit, paths in paths_by_unit.items():
+            section = unit_section(markdown, unit)
+            print(
+                f"PREFLIGHT unit={unit} refs={len(paths)} duration={duration(section, unit)} "
+                f"resolution={args.resolution} public_upload=pending",
+                flush=True,
+            )
+    else:
+        raise RuntimeError("12AI 预检需要 --reference-urls 或 --auto-public-refs")
+    print("BUDGET unknown", flush=True)
+    return 0
+
+
 def submit(args: argparse.Namespace) -> int:
     provider = config()["providers"][PROVIDER_NAME]
     token, base_url = load_video_provider_config(PROVIDER_NAME, ENV_NAME, DEFAULT_BASE_URL)
     base_url = (args.base_url or base_url).rstrip("/")
-    names = model_names(video_model_rows(api_json(endpoint(provider, "models"), token, timeout=30)))
-    if args.model not in names:
-        raise RuntimeError("当前 12AI 模型表不包含用户确认的完整模型名，停止提交")
-    refs_by_unit = json.loads(Path(args.reference_urls).read_text(encoding="utf-8-sig"))
+    require_current_model(provider, token, args.model)
     story_root = Path(args.story_root).resolve()
     units = parse_units(args.units)
+    task_dir = Path(args.task_dir).resolve()
+    task_dir.mkdir(parents=True, exist_ok=True)
+    if args.reference_urls:
+        refs_by_unit = json.loads(Path(args.reference_urls).read_text(encoding="utf-8-sig"))
+    elif args.auto_public_refs:
+        paths_by_unit = local_reference_paths(
+            story_root,
+            args.prompt_file,
+            units,
+            args.allow_partial_grids,
+        )
+        refs_by_unit = auto_public_references(paths_by_unit, Path(args.image_cache).resolve())
+        reference_file = task_dir / f"12ai-reference-urls-{args.version}.json"
+        reference_file.write_text(
+            json.dumps(refs_by_unit, ensure_ascii=False, indent=2),
+            encoding="utf-8",
+        )
+        print(f"REFERENCE_MAP path={reference_file}", flush=True)
+    else:
+        raise RuntimeError("12AI 提交需要 --reference-urls 或 --auto-public-refs")
     prepared = prepared_units(story_root, args.prompt_file, units, refs_by_unit, args.allow_partial_grids)
     ledger = Path(args.ledger).resolve()
     if ledger.exists() and ledger.stat().st_size:
         raise FileExistsError(f"账本已存在且非空，拒绝重复提交: {ledger}")
     ledger.parent.mkdir(parents=True, exist_ok=True)
-    task_dir = Path(args.task_dir).resolve()
-    task_dir.mkdir(parents=True, exist_ok=True)
     errors = {}
     for unit in units:
         item = prepared[unit]
@@ -223,12 +322,18 @@ def poll(args: argparse.Namespace) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=["submit", "poll"])
+    parser.add_argument("mode", choices=["preflight", "submit", "poll"])
     parser.add_argument("--story-root", required=True)
-    parser.add_argument("--ledger", required=True)
+    parser.add_argument("--ledger", default="")
     parser.add_argument("--units", default="")
     parser.add_argument("--model", default="")
     parser.add_argument("--reference-urls", help="每单元公开参考图 URL 的 JSON 映射；12AI 必填")
+    parser.add_argument(
+        "--auto-public-refs",
+        action="store_true",
+        help="按挂载顺序把本地参考图上传到项目配置的 imgbb；仅在用户明确确认后用于 submit",
+    )
+    parser.add_argument("--image-cache", default="", help="自动公开参考图的 sha256 URL 缓存")
     parser.add_argument("--task-dir", help="请求/响应临时文件目录；12AI submit 必填")
     parser.add_argument("--prompt-file", default="分镜提示词.md")
     parser.add_argument("--base-url", default=None)
@@ -240,8 +345,18 @@ def main() -> int:
     parser.add_argument("--version", default="v1")
     parser.add_argument("--output-suffix", default="-12ai")
     args = parser.parse_args()
-    if args.mode == "submit" and (not args.units or not args.model or not args.reference_urls or not args.task_dir):
-        parser.error("submit 需要 --units --model --reference-urls --task-dir")
+    if args.mode in {"preflight", "submit"} and (not args.units or not args.model):
+        parser.error(f"{args.mode} 需要 --units --model")
+    if args.mode in {"preflight", "submit"} and not (args.reference_urls or args.auto_public_refs):
+        parser.error(f"{args.mode} 需要 --reference-urls 或 --auto-public-refs")
+    if args.mode == "submit" and not args.task_dir:
+        parser.error("submit 需要 --task-dir")
+    if args.mode == "submit" and args.auto_public_refs and not args.image_cache:
+        parser.error("--auto-public-refs 提交需要 --image-cache")
+    if args.mode in {"submit", "poll"} and not args.ledger:
+        parser.error(f"{args.mode} 需要 --ledger")
+    if args.mode == "preflight":
+        return preflight(args)
     return submit(args) if args.mode == "submit" else poll(args)
 
 

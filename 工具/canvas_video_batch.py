@@ -193,14 +193,12 @@ def resolve_mount(root: Path, token: str, unit: int | None = None, grid_dir: Pat
     raise ValueError(f"无法解析挂载项: {token}")
 
 
-def unit_payload(
+def unit_inputs(
     story_root: Path,
     markdown: str,
     unit: int,
-    model: str,
-    resolution: str,
     grid_dir: Path | None = None,
-) -> tuple[dict, list[Path]]:
+) -> tuple[str, list[Path], int]:
     section = unit_section(markdown, unit)
     prompt = video_prompt(section, unit)
     tokens = mount_tokens(section, unit)
@@ -213,18 +211,30 @@ def unit_payload(
         raise ValueError(
             f"单元{unit}图片编号超过挂载数: max={max(used_indexes)}, mounts={len(paths)}"
         )
+    duration_match = re.search(r"(?m)^生成参数：\s*(\d+)秒", section)
+    if not duration_match:
+        raise ValueError(f"单元{unit}未找到生成时长")
+    return prompt, paths, int(duration_match.group(1))
+
+
+def unit_payload(
+    story_root: Path,
+    markdown: str,
+    unit: int,
+    model: str,
+    resolution: str,
+    grid_dir: Path | None = None,
+) -> tuple[dict, list[Path]]:
+    prompt, paths, duration = unit_inputs(story_root, markdown, unit, grid_dir)
     images = []
     for path in paths:
         mime = mimetypes.guess_type(path.name)[0] or "image/png"
         images.append(f"data:{mime};base64," + base64.b64encode(path.read_bytes()).decode("ascii"))
-    duration_match = re.search(r"(?m)^生成参数：\s*(\d+)秒", section)
-    if not duration_match:
-        raise ValueError(f"单元{unit}未找到生成时长")
     payload = {
         "model": model,
         "prompt": prompt,
         "images": images,
-        "duration": int(duration_match.group(1)),
+        "duration": duration,
         "aspect_ratio": "9:16",
         "ratio": "9:16",
         "resolution": resolution,
@@ -283,6 +293,55 @@ def append_ledger(path: Path, entry: dict, lock: threading.Lock) -> None:
             os.fsync(handle.fileno())
 
 
+def require_current_video_model(base_url: str, token: str, model: str) -> dict:
+    models = api_json(base_url + "/v1/models", token)
+    rows = models.get("data") if isinstance(models, dict) else None
+    selected = []
+    for row in rows or []:
+        if not isinstance(row, dict) or row.get("id") != model:
+            continue
+        endpoint_types = row.get("supported_endpoint_types") or []
+        searchable = f"{row.get('id', '')} {row.get('name', '')}"
+        is_video = (
+            row.get("type") == "video"
+            or "openai-video" in endpoint_types
+            or "openai-videos" in endpoint_types
+            or re.search(r"seedance|video|veo|kling|wan|hailuo|sora|luma|runway", searchable, re.I)
+        )
+        if is_video:
+            selected.append(row)
+    if len(selected) != 1:
+        raise RuntimeError("实时模型表中不存在用户确认的完整视频模型名，停止操作")
+    return selected[0]
+
+
+def preflight(args: argparse.Namespace) -> int:
+    token, configured_base_url = load_video_provider_config(
+        "canvas_video", "CANVAS_VIDEO_API_TOKEN", DEFAULT_BASE_URL
+    )
+    base_url = (args.base_url or configured_base_url).rstrip("/")
+    require_current_video_model(base_url, token, args.model)
+    story_root = Path(args.story_root).resolve()
+    markdown_path = story_root / args.prompt_file
+    markdown = markdown_path.read_text(encoding="utf-8")
+    ready = bool(re.search(r"(?m)^(?:fenjing_ready|grids_ready):\s*true\s*$", markdown))
+    if not ready and not args.allow_partial_grids:
+        raise RuntimeError("fenjing_ready 不是 true（老集为 grids_ready）；仅用户明确点名放行部分单元时可加 --allow-partial-grids")
+    units = parse_units(args.units)
+    grid_dir = (story_root / args.grid_dir).resolve() if args.grid_dir else None
+    if grid_dir is not None and not grid_dir.is_dir():
+        raise FileNotFoundError(grid_dir)
+    for unit in units:
+        _prompt, paths, duration = unit_inputs(story_root, markdown, unit, grid_dir)
+        print(
+            f"PREFLIGHT unit={unit} images={len(paths)} duration={duration} "
+            f"ratio=9:16 resolution={args.resolution}",
+            flush=True,
+        )
+    print("BUDGET unknown", flush=True)
+    return 0
+
+
 def submit(args: argparse.Namespace) -> int:
     token, configured_base_url = load_video_provider_config(
         "canvas_video", "CANVAS_VIDEO_API_TOKEN", DEFAULT_BASE_URL
@@ -298,20 +357,7 @@ def submit(args: argparse.Namespace) -> int:
     ready = bool(re.search(r"(?m)^(?:fenjing_ready|grids_ready):\s*true\s*$", markdown))
     if not ready and not args.allow_partial_grids:
         raise RuntimeError("fenjing_ready 不是 true（老集为 grids_ready）；仅用户明确点名放行部分单元时可加 --allow-partial-grids")
-    models = api_json(base_url + "/v1/models", token)
-    rows = models.get("data") if isinstance(models, dict) else None
-    selected = [
-        row for row in (rows or [])
-        if isinstance(row, dict)
-        and row.get("id") == args.model
-        and (
-            row.get("type") == "video"
-            or "openai-video" in (row.get("supported_endpoint_types") or [])
-            or "openai-videos" in (row.get("supported_endpoint_types") or [])
-        )
-    ]
-    if len(selected) != 1:
-        raise RuntimeError("实时模型表中不存在用户确认的完整视频模型名，停止提交")
+    require_current_video_model(base_url, token, args.model)
     ledger = Path(args.ledger).resolve()
     if ledger.exists() and ledger.stat().st_size:
         raise FileExistsError(f"账本已存在且非空，拒绝重复提交: {ledger}")
@@ -472,9 +518,9 @@ def poll(args: argparse.Namespace) -> int:
 
 def main() -> int:
     parser = argparse.ArgumentParser()
-    parser.add_argument("mode", choices=["submit", "poll"])
+    parser.add_argument("mode", choices=["preflight", "submit", "poll"])
     parser.add_argument("--story-root", required=True)
-    parser.add_argument("--ledger", required=True)
+    parser.add_argument("--ledger", default="")
     parser.add_argument("--units", default="")
     parser.add_argument("--base-url", default=None, help="覆盖统一 API 配置中的 base_url")
     parser.add_argument("--model", default=DEFAULT_MODEL)
@@ -487,10 +533,14 @@ def main() -> int:
     parser.add_argument("--timeout", type=int, default=1200)
     parser.add_argument("--allow-partial-grids", action="store_true")
     args = parser.parse_args()
-    if args.mode == "submit" and not args.units:
-        parser.error("submit 需要 --units")
-    if args.mode == "submit" and not args.model:
-        parser.error("submit 需要 --model，模型必须按当前批次与用户确认")
+    if args.mode in {"preflight", "submit"} and not args.units:
+        parser.error(f"{args.mode} 需要 --units")
+    if args.mode in {"preflight", "submit"} and not args.model:
+        parser.error(f"{args.mode} 需要 --model，模型必须按当前批次与用户确认")
+    if args.mode in {"submit", "poll"} and not args.ledger:
+        parser.error(f"{args.mode} 需要 --ledger")
+    if args.mode == "preflight":
+        return preflight(args)
     return submit(args) if args.mode == "submit" else poll(args)
 
 

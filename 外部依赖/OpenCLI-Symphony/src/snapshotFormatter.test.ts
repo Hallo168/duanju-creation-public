@@ -576,4 +576,3 @@ describe('formatSnapshot', () => {
     });
   });
 });
-
