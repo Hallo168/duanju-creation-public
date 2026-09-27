@@ -4,7 +4,7 @@
 
 1. OpenCLI 生产依赖 `js-yaml 4.2.0` 命中 GHSA-52cp-r559-cp3m。已最小升级到 `js-yaml 4.3.0`，更新 `package.json` 和 `package-lock.json`。
 2. 接受 Pro 的建议：`compiled_bundle_root()` 找不到 `integrity.json` 时直接抛出 `integrity_manifest_missing`，不再返回 `parents[2]` 猜测目录。
-3. 接受 Pro 的建议：构建脚本新增 `-CompilerRoot` 参数，并支持 `SYMPHONY_BUILD_ROOT`；`F:\CodexBuild` 只作为发行机构建机默认值。
+3. 接受 Pro 的建议：构建脚本新增 `-CompilerRoot` 参数，并支持 `SYMPHONY_BUILD_ROOT`；`<本机路径>` 只作为发行机构建机默认值。
 4. 新增测试：主 EXE 在读取机器码前校验完整性、缺失清单 fail-closed、编译 bundle root 不猜目录。
 
 最终复验：
@@ -21,7 +21,7 @@
 
 最终产品制品：
 
-- 文件：`<主仓库根>\工具\symphony\dist-product.zip`
+- 文件：`<项目根目录>\工具\symphony\dist-product.zip`
 - 大小：154,054,288 bytes
 - SHA-256：`BAC76B4B470E75C3A0B301ED413EDEC8E2A0A5D1C6C85812AE6BA3D994FC4C80`
 

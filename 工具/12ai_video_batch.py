@@ -335,7 +335,7 @@ def main() -> int:
     )
     parser.add_argument("--image-cache", default="", help="自动公开参考图的 sha256 URL 缓存")
     parser.add_argument("--task-dir", help="请求/响应临时文件目录；12AI submit 必填")
-    parser.add_argument("--prompt-file", default="分镜提示词.md")
+    parser.add_argument("--prompt-file", default="分镜-30秒/分镜提示词.md")
     parser.add_argument("--base-url", default=None)
     parser.add_argument("--resolution", default="480p")
     parser.add_argument("--no-audio", action="store_true")

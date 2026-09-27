@@ -22,7 +22,7 @@ class GuaguResolutionTests(unittest.TestCase):
         )
 
     def test_selected_resolution_reaches_request_and_ledger(self):
-        fixture_root = Path(__file__).resolve().parents[1] / "tools/storyboard-workbench/.local/test-fixtures"
+        fixture_root = Path(__file__).resolve().parents[1] / "工具/运行垃圾/test-fixtures/guagu"
         fixture_root.mkdir(parents=True, exist_ok=True)
         for model_id, resolution in [("seedance28", "720p"), ("seedance54", "4k"), ("seedance52", "1080p"), ("seedance50", "480p")]:
             with self.subTest(model=model_id), tempfile.TemporaryDirectory(dir=fixture_root) as temporary:

@@ -16,7 +16,7 @@
 `tools/build_product.ps1` 默认输出到旧目录：
 
 ```text
-<SymphonyProxy>\dist-product
+<本机依赖目录>\dist-product
 ```
 
 同一脚本又要求输出目录必须位于当前项目目录内。直接执行：
@@ -32,7 +32,7 @@
 执行：
 
 ```powershell
-.\tools\build_product.ps1 -OutputDir .\dist-product -OpenCliRoot <OpenCLI-Symphony>
+.\tools\build_product.ps1 -OutputDir .\dist-product -OpenCliRoot <本机依赖目录>
 ```
 
 Nuitka 在当前中文 Windows 环境读取环境文件时发生：
@@ -89,7 +89,7 @@ runtime\proxy\SymphonyLocal.exe serve
 而 `app/config.py` 的 OpenCLI 默认路径仍是：
 
 ```text
-<OpenCLI-Symphony>\dist\src\main.js
+<本机依赖目录>\dist\src\main.js
 ```
 
 所以即使编译成功，换机器后 warmup、首次登录和浏览器回退也会寻找不存在的开发机路径。
@@ -142,7 +142,7 @@ runtime\proxy\SymphonyLocal.exe serve
 文件：
 
 ```text
-<主仓库根>\工具\运行垃圾\tasks\symphony-distribution-review-20260729-1519.zip
+<项目根目录>\工具\运行垃圾\tasks\symphony-distribution-review-20260729-1519.zip
 ```
 
 - 文件数：28

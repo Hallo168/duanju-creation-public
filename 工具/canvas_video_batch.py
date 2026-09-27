@@ -61,7 +61,13 @@ def unit_section(markdown: str, unit: int | float) -> str:
     )
     if not match:
         raise ValueError(f"未找到单元{unit}")
-    return match.group(0)
+    section = match.group(0)
+    frontmatter = re.match(r"\A---\r?\n(.*?)\r?\n---(?:\r?\n|$)", markdown, re.S)
+    if frontmatter and re.search(r'''(?m)^mode:[ \t]*["']?30秒["']?[ \t]*(?:#.*)?\r?$''', frontmatter[1]):
+        duration = re.search(r"(?m)^生成参数：\s*(\d+)秒", section)
+        if not duration or int(duration[1]) != 30:
+            raise ValueError(f"单元{unit}属于30秒分镜，生成参数必须固定30秒")
+    return section
 
 
 def video_prompt(section: str, unit: int) -> str:
@@ -96,6 +102,8 @@ def mount_tokens(section: str, unit: int) -> list[str]:
     tokens = [item for item in tokens if item]
     if not tokens:
         raise ValueError(f"单元{unit}视频挂载为空")
+    if len(tokens) > 9:
+        raise ValueError(f"单元{unit}参考图共{len(tokens)}张，项目上限为9张；请调整挂载或重排单元")
     return tokens
 
 
@@ -524,7 +532,7 @@ def main() -> int:
     parser.add_argument("--units", default="")
     parser.add_argument("--base-url", default=None, help="覆盖统一 API 配置中的 base_url")
     parser.add_argument("--model", default=DEFAULT_MODEL)
-    parser.add_argument("--prompt-file", default="分镜提示词.md", help="相对故事目录的分镜提示词路径（模式子文件夹如 分镜-自然段落/分镜提示词.md）")
+    parser.add_argument("--prompt-file", default="分镜-30秒/分镜提示词.md", help="相对故事目录的分镜提示词路径；历史分镜请明确传原路径")
     parser.add_argument("--grid-dir", default=None, help="相对故事目录的宫格版本目录")
     parser.add_argument("--output-suffix", default="")
     parser.add_argument("--resolution", default="720p")

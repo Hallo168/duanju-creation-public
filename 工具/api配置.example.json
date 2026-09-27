@@ -1,9 +1,35 @@
 {
-  "_note": "生图配置按 providers 登记：普通资产使用 chatgpt2api；彩铅专用 flow2api_banana2 服从 工具/生产开关.json。统一入口为 工具/gen_grids_multi.py，不设自动备用生图通道。",
+  "_note": "生图配置按 providers 登记：普通资产使用 chatgpt2api；彩铅专用 flowkit_banana2 服从 工具/生产开关.json。统一入口为 工具/gen_grids_multi.py，不设自动备用生图通道。",
+  "video_defaults": {
+    "provider": "meaicc_video",
+    "model": "w-3",
+    "resolution": "1080P",
+    "duration": 30,
+    "aspect_ratio": "9:16"
+  },
   "providers": {
+    "meaicc_video": {
+      "kind": "async_video_generation",
+      "label": "MEAICC",
+      "base_url": "https://api.meaicc.com",
+      "auth": "bearer",
+      "credential_file": "",
+      "credential_field": "key",
+      "default_model": "w-3",
+      "selection": "default",
+      "executor": "工具/meaicc_video_batch.py",
+      "endpoints": {
+        "models": "GET /v1/models",
+        "pricing": "GET /api/pricing",
+        "submit": "POST /v1/videos",
+        "detail": "GET /v1/videos/{task_id}"
+      },
+      "poll_interval_seconds": 30,
+      "submit_retry": "never_automatic"
+    },
     "chatgpt2api": {
       "kind": "openai_compatible",
-      "doc": "本机部署，使用指南见 <主仓库根>/usage.md；源码 2026-08-02 起收编于 外部依赖/chatgpt2api（唯一维护版，F:\\chatgpt2api 停用），启动=该目录 uv run main.py",
+      "doc": "",
       "base_url": "http://127.0.0.1:8000",
       "api_key": "",
       "model": "gpt-image-2",
@@ -20,24 +46,19 @@
       "preflight": "跑批前先 curl /v1/models 确认后端活着且 gpt-image-2 在列；面板账号列表为空 = 号池未导入或进程内存态过期（重启后端）。后端未起时脚本会整批失败。",
       "timing": "文生图 ~30s/张，多参考图 edits ~95s/张（实测 2026-07-16）"
     },
-    "flow2api_banana2": {
-      "kind": "gemini_image_edit",
-      "doc": "<主仓库根>/外部依赖/flow2api/README.md",
-      "base_url": "http://127.0.0.1:8001",
-      "settings_path": "<主仓库根>/外部依赖/flow2api/config/setting.toml",
-      "model": "gemini-3.1-flash-image",
+    "flowkit_banana2": {
+      "kind": "flowkit_image_edit",
+      "doc": "",
+      "base_url": "http://127.0.0.1:8100",
+      "model": "NARWHAL",
       "aspect_ratio": "9:16",
       "image_size": "1K",
       "prompt": "不改变图片，把图片风格转换成素描彩铅画",
-      "concurrency": 5,
-      "endpoints": {
-        "models": "/models",
-        "generate": "/models/{model}:generateContent"
-      },
-      "auth": "运行时只读 外部依赖/flow2api/config/setting.toml 的 global.api_key（该文件不入 git），密钥不在配置里重复保存",
+      "concurrency": 1,
+      "auth": "使用已登录 Chrome 中的 Flow Kit 扩展；账号会话留在浏览器，不读取 Flow2API Token/AT 或 setting.toml",
       "routing": "仅处理带单张写实人物参考图的彩铅参考图；强制 9:16、1K、固定提示词，不允许回退到其他 provider",
-      "output": "Flow2API 返回 JPEG 时由 gen_grids_multi.py 无损解码后转存 PNG，保持现有资产文件契约",
-      "preflight": "每批含彩铅任务时先 GET /models，确认 models/gemini-3.1-flash-image 在列"
+      "output": "Flow Kit 原图下载后由 ffmpeg 解码转存 PNG，保持现有资产文件契约",
+      "preflight": "核对 /health 的扩展连接与 /api/flow/status 的 batch 通道、固定项目及冷却状态；旧任务 provider=flow2api_banana2 仅作为此渠道的兼容别名"
     },
     "canvas_video": {
       "kind": "video_generation",
@@ -54,7 +75,7 @@
     },
     "guagu_video": {
       "kind": "video_generation",
-      "doc": "<主仓库根>/Google下载/guagu-openapi-v1.md",
+      "doc": "",
       "base_url": "https://guagu.cc",
       "api_key": "",
       "auth": "Authorization: Bearer <api_key>",
@@ -66,19 +87,19 @@
         "detail": "GET /openapi/v1/video-generations/{id}"
       },
       "credential_env_override": "GUAGU_VIDEO_API_KEY",
-      "model_policy": "默认视频生成渠道（2026-09-09 用户指定）；不再询问平台。完整模型名与费用按实时模型表和本批选择核对，不自动沿用历史模型，也不自动跨渠道重投。"
+      "model_policy": "按需视频渠道；用户明确指定时使用。完整模型名与费用按实时目录核对，不自动跨渠道重投。"
     },
     "symphony_video": {
       "kind": "async_video_generation",
       "vendor": "TikTok Symphony Creative Studio（Dreamina Seedance 2.0）",
-      "doc": "<主仓库根>/工具/symphony/README.md 与 STATUS.md；规范见 .claude/skills/fenjing/知识/视频生成规范.md 五节",
+      "doc": "",
       "base_url": "http://127.0.0.1:8765",
       "auth": "none",
       "api_key": "",
       "local_proxy": {
         "启动": "双击 工具/symphony/启动代理.cmd（或 cd 工具/symphony && uv run python launch.py）",
         "本机配置": "工具/symphony/symphony配置.json（端口/OpenCLI入口/ffprobe/默认主账号/默认子账号）——改端口要同步改本条 base_url",
-        "端口占用说明": "<SymphonyProxy> 是同一份代码的历史原件，同端口，已停用不再启动；日常只启动项目内这一份"
+        "端口占用说明": ""
       },
       "endpoints": {
         "models": "GET {base_url}/v1/models",
@@ -94,15 +115,15 @@
       "canonical_request_shape": {
         "prompt": "<单元提示词正文，UTF-8>",
         "refs": [
-          "<主仓库根>/stories/29-示例/资产图/R1-彩铅三视图.png",
-          "<主仓库根>/stories/29-示例/资产图/S1-场景全景.png"
+          "",
+          ""
         ],
         "mode": "reference",
         "model": "Dreamina Seedance 2.0",
         "duration": 15,
         "wait": false,
         "backend": "auto",
-        "main_account": null,
+        "main_account": "",
         "account": null
       },
       "submit_flow": [
@@ -122,7 +143,7 @@
         "aspect": "平台侧竖屏 9:16，接口没有画幅参数，改画幅要去平台账号设置。",
         "wait": "必须 false。true 会绕过直连、退回浏览器后端。"
       },
-      "billing_note": "1 秒 = 1 积分（15 秒 = 15 积分），预付费积分池不是按次计费。当前可用主账号：main-b（10 个子账号；2026-08-11 换绑新 TK 账号，别名沿用）与 main-a（5 个子账号：main-a~main-e），全机共 15 个子账号，各主账号/子账号积分与并发独立。审核失败会退积分。提交前用 main_accounts/accounts/credits 端点核对，本批总积分 = Σ各单元时长。",
+      "billing_note": "",
       "known_errors_and_actions": {
         "HTTP 503 direct_unavailable": "直连登录态缺失或过期。跑一次 node <OpenCLI入口> tiktok-symphony direct-session -f json 重新采集。",
         "HTTP 403 license_*": "本机许可证过期或未激活。GET /v1/license/status 看 expiresAt，过期要重新签发激活。",
@@ -217,7 +238,7 @@
       "base_url": "https://mjnewapi.unmau.com",
       "auth": "bearer",
       "credential_env_override": "MJNEWAPI_API_KEY",
-      "credential_file": "<用户桌面>/mjnewapi.txt",
+      "credential_file": "",
       "credential_field": "KEY",
       "default_model": "cd-seedance 2.0 720p",
       "selection": "explicit_user_choice",
@@ -236,6 +257,66 @@
         "aspect_ratio": "9:16",
         "resolution": "720p"
       },
+      "submit_retry": "never_automatic",
+      "poll_interval_seconds": 30
+    },
+    "yfai_video": {
+      "kind": "async_video_generation",
+      "label": "YFAI",
+      "base_url": "https://yf.token6688.com",
+      "auth": "bearer",
+      "credential_env_override": "YFAI_API_KEY",
+      "credential_file": "",
+      "credential_format": "sk_token",
+      "selection": "explicit_user_choice",
+      "executor": "工具/yfai_video_batch.py",
+      "doc": "Google下载/YFAI-API文档-概览-2026-09-12.md",
+      "endpoints": {
+        "models": "GET /v1/logical-models",
+        "public_models": "GET /v1/skills/models?type=video",
+        "balance": "GET /v1/skills/balance",
+        "estimate": "POST /v1/pricing-estimate",
+        "dry_run": "POST /api/v1/model-runtime/dry-run",
+        "files": "POST /v1/files",
+        "submit": "POST /v1/videos/generations",
+        "detail": "GET /v1/tasks/{task_id}"
+      },
+      "defaults": {
+        "duration": 15,
+        "aspect_ratio": "9:16",
+        "resolution": "720p"
+      },
+      "reference_mode": "provider_public_https_urls",
+      "submit_retry": "never_automatic",
+      "poll_interval_seconds": 10,
+      "model_policy": "完整模型名、参数合法值与费用按实时目录和本批选择核对，不设置渠道内默认模型。工作台仅展示支持15秒、9:16、720p和多图参考模式的可用模型。",
+      "routing_note": "按YFAI密钥现有调度策略选上游；预检显示实付估价、备用上限和预冻结额。本地执行器不自动换provider或重投。"
+    },
+    "dolasd_video": {
+      "kind": "async_video_generation",
+      "label": "Dolasd",
+      "base_url": "https://dolasd.xyz",
+      "auth": "bearer",
+      "credential_env_override": "DOLASD_API_KEY",
+      "credential_file": "",
+      "credential_field": "KEY",
+      "default_model": "seedance-2.5",
+      "selection": "explicit_user_choice",
+      "executor": "工具/dolasd_video_batch.py",
+      "doc": "工具/dolasd视频渠道.md",
+      "endpoints": {
+        "models": "GET /v1/models",
+        "key_info": "GET /v1/key/info",
+        "submit": "POST /v1/videos/generations",
+        "detail": "GET /v1/videos/{task_id}",
+        "download": "GET /v1/videos/{task_id}/content"
+      },
+      "defaults": {
+        "duration": 30,
+        "size": "720x1280"
+      },
+      "reference_mode": "multipart_image_files_required",
+      "pricing": "unknown_no_public_price_endpoint",
       "submit_retry": "never_automatic",
       "poll_interval_seconds": 30
     }

@@ -1,15 +1,17 @@
 # -*- coding: utf-8 -*-
 # Concurrent image generation with topological layers and fixed task routing.
-# Ordinary assets use chatgpt2api; colored-pencil derivatives use Flow2API Banana 2
+# Ordinary assets use chatgpt2api; colored-pencil derivatives use Flow Kit Banana 2
 # only when the production switch permits them. Failed tasks never switch routes.
 # Usage: python gen_grids_multi.py <task_json> [c2a_cap]
 # c2a_cap defaults to 6; use 0 for colored-pencil-only batches.
 # Preflight ordinary batches against chatgpt2api /v1/models before submission.
-# Enabled colored-pencil batches preflight Flow2API /models automatically.
+# Enabled colored-pencil batches preflight the Flow Kit extension and pinned project.
 import argparse
-import json, os, re, sys, shutil, base64, uuid, subprocess, time, threading, mimetypes, tomllib
+import json, os, re, sys, shutil, base64, uuid, subprocess, time, threading
 import urllib.error, urllib.request
+import hashlib
 from concurrent.futures import ThreadPoolExecutor
+from pathlib import Path
 
 parser = argparse.ArgumentParser(description="Generate ordinary assets and colored-pencil references on their fixed routes.")
 parser.add_argument("task_json")
@@ -21,6 +23,8 @@ TASK_JSON = args.task_json
 C2A_CAP = args.c2a_cap
 
 TOOLDIR = os.path.dirname(os.path.abspath(__file__))
+FLOWKIT_CLIENT = None
+COLORED_PROVIDERS = {"flowkit_banana2", "flow2api_banana2"}
 
 def colored_pencil_enabled():
     policy_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "生产开关.json")
@@ -33,17 +37,36 @@ def colored_pencil_enabled():
         raise RuntimeError("invalid colored_pencil_enabled production setting")
     return enabled
 
-def is_flow2_colored_task(t):
+def is_colored_task(t):
     """Colored-pencil derivatives have a dedicated route controlled by the production switch."""
-    return t.get("provider") == "flow2api_banana2" or bool(
+    return t.get("provider") in COLORED_PROVIDERS or bool(
         re.search("彩铅|素描", os.path.basename(t.get("file", "")))
     )
 
 PLAN = json.load(open(TASK_JSON, encoding="utf-8"))
 OUTDIR = PLAN["output_dir"]
 tasks = {t["id"]: t for t in PLAN["tasks"]}
-if not colored_pencil_enabled():
-    paused = {tid: task for tid, task in tasks.items() if is_flow2_colored_task(task)}
+
+def episode_pencil_authorization():
+    episode = PLAN.get("colored_pencil_episode_authorization")
+    if not episode:
+        return False
+    project_root = Path(__file__).resolve().parent.parent
+    story_root = (project_root / "stories" / episode).resolve()
+    asset_root = story_root / "资产图"
+    if not story_root.is_dir() or Path(OUTDIR).resolve() != asset_root:
+        raise RuntimeError("episode colored-pencil authorization must target that story's asset folder")
+    if not tasks or any(not is_colored_task(task) for task in tasks.values()):
+        raise RuntimeError("episode colored-pencil authorization only covers colored-pencil tasks")
+    for task in tasks.values():
+        refs = task.get("refs") or []
+        if len(refs) != 1 or Path(refs[0]).resolve().parent != asset_root or not Path(refs[0]).name.startswith("R"):
+            raise RuntimeError("episode colored-pencil task must use one realistic character source in this story")
+    return True
+
+EPISODE_PENCIL_AUTHORIZED = episode_pencil_authorization()
+if not colored_pencil_enabled() and not EPISODE_PENCIL_AUTHORIZED:
+    paused = {tid: task for tid, task in tasks.items() if is_colored_task(task)}
     paused_files = {os.path.normcase(os.path.basename(task["file"])) for task in paused.values()}
     for tid in paused:
         print(tid + ": SKIP[colored-pencil temporarily disabled]", flush=True)
@@ -59,7 +82,7 @@ if not colored_pencil_enabled():
 with open(os.path.join(TOOLDIR, "api配置.json"), encoding="utf-8") as config_file:
     CONFIG = json.load(config_file)
 C2A = CONFIG.get("providers", {}).get("chatgpt2api")
-FLOW2 = CONFIG.get("providers", {}).get("flow2api_banana2")
+FLOWKIT = CONFIG.get("providers", {}).get("flowkit_banana2")
 
 # Explicit caps must never override a provider disabled by the user.
 if C2A_CAP > 0 and C2A and C2A.get("disabled"):
@@ -70,40 +93,33 @@ TMP    = os.path.join(os.environ["TEMP"], "gridmulti")
 os.makedirs(TMP, exist_ok=True); os.makedirs(OUTDIR, exist_ok=True)
 
 for _tid, _task in tasks.items():
-    if _task.get("provider") not in (None, "", "c2a", "chatgpt2api", "flow2api_banana2"):
+    if _task.get("provider") not in (None, "", "c2a", "chatgpt2api", *COLORED_PROVIDERS):
         print("unsupported image provider in task: " + _tid)
         sys.exit(2)
-    if "彩铅参考图" in os.path.basename(_task.get("file", "")) and not _task.get("refs"):
+    if is_colored_task(_task) and len(_task.get("refs") or []) != 1:
         print("colored-pencil task requires exactly one source ref: " + _tid)
         sys.exit(1)
 
-FLOW_TASK_IDS = [tid for tid, t in tasks.items() if is_flow2_colored_task(t)]
-REGULAR_TASK_IDS = [tid for tid, t in tasks.items() if not is_flow2_colored_task(t)]
+FLOW_TASK_IDS = [tid for tid, t in tasks.items() if is_colored_task(t)]
+REGULAR_TASK_IDS = [tid for tid, t in tasks.items() if not is_colored_task(t)]
 
 if C2A:
     C2A_BASE = C2A["base_url"].rstrip("/")
     C2A_GEN  = C2A_BASE + "/v1/images/generations"
     C2A_EDIT = C2A_BASE + "/v1/images/edits"
 
-if FLOW2 and FLOW_TASK_IDS:
-    if FLOW2.get("disabled"):
-        print("flow2api_banana2 disabled in api configuration; stopped without submission")
+if FLOWKIT and FLOW_TASK_IDS:
+    if FLOWKIT.get("disabled"):
+        print("flowkit_banana2 disabled in api configuration; stopped without submission")
         sys.exit(2)
-    _flow_settings_path = FLOW2["settings_path"]
-    with open(_flow_settings_path, "rb") as _flow_settings_file:
-        _flow_settings = tomllib.load(_flow_settings_file)
-    FLOW2_KEY = _flow_settings["global"]["api_key"]
-    FLOW2_BASE = FLOW2["base_url"].rstrip("/")
-    FLOW2_MODELS = FLOW2_BASE + FLOW2["endpoints"]["models"]
-    FLOW2_GENERATE = FLOW2_BASE + FLOW2["endpoints"]["generate"].format(model=FLOW2["model"])
-    FLOW2_CAP = max(1, int(FLOW2.get("concurrency", 1)))
+    FLOWKIT_CAP = max(1, int(FLOWKIT.get("concurrency", 1)))
 else:
-    FLOW2_CAP = 0
+    FLOWKIT_CAP = 0
 
 PROVIDERS = [("c2a", C2A_CAP)] if (C2A_CAP > 0 and C2A) else []
-FLOW_PROVIDERS = ([("flow2api_banana2", FLOW2_CAP)] if (FLOW_TASK_IDS and FLOW2) else [])
-if FLOW_TASK_IDS and not FLOW2:
-    print("flow2api_banana2 provider missing"); sys.exit(1)
+FLOW_PROVIDERS = ([("flowkit_banana2", FLOWKIT_CAP)] if (FLOW_TASK_IDS and FLOWKIT) else [])
+if FLOW_TASK_IDS and not FLOWKIT:
+    print("flowkit_banana2 provider missing"); sys.exit(1)
 if REGULAR_TASK_IDS and not PROVIDERS:
     print("no general providers enabled"); sys.exit(1)
 ALL_PROVIDERS = PROVIDERS + FLOW_PROVIDERS
@@ -154,44 +170,17 @@ def _openai_image_bytes(resp_path, work):
         return open(o, "rb").read()
     raise RuntimeError("no b64/url")
 
-def _image_mime(path):
-    head = open(path, "rb").read(16)
-    if head.startswith(b"\x89PNG\r\n\x1a\n"): return "image/png"
-    if head.startswith(b"\xff\xd8\xff"): return "image/jpeg"
-    if head.startswith(b"RIFF") and head[8:12] == b"WEBP": return "image/webp"
-    return mimetypes.guess_type(path)[0] or "image/png"
-
-def _as_png(data, mime, work):
-    """Keep the existing .png asset contract even when Flow2API returns JPEG."""
-    if mime == "image/png" or data.startswith(b"\x89PNG\r\n\x1a\n"):
-        return data
-    src = os.path.join(work, "flow_source.bin")
-    dst = os.path.join(work, "flow_output.png")
-    open(src, "wb").write(data)
-    ps = (
-        "Add-Type -AssemblyName System.Drawing;"
-        "$img=[System.Drawing.Image]::FromFile('%s');"
-        "try{$img.Save('%s',[System.Drawing.Imaging.ImageFormat]::Png)}finally{$img.Dispose()}"
-    ) % (src.replace("'", "''"), dst.replace("'", "''"))
-    result = subprocess.run(["powershell", "-NoProfile", "-Command", ps], capture_output=True)
-    if result.returncode != 0 or not os.path.exists(dst):
-        raise RuntimeError("Flow2API image-to-PNG conversion failed")
-    return open(dst, "rb").read()
-
-def preflight_flow2api():
-    req = urllib.request.Request(
-        FLOW2_MODELS,
-        headers={"Authorization": "Bearer " + FLOW2_KEY, "x-goog-api-key": FLOW2_KEY},
+def preflight_flowkit():
+    global FLOWKIT_CLIENT
+    from flowkit_image_client import FlowKitImageClient
+    client = FlowKitImageClient(
+        FLOWKIT["base_url"], model=FLOWKIT["model"],
+        aspect_ratio=FLOWKIT["aspect_ratio"], image_size=FLOWKIT["image_size"],
+        prompt=FLOWKIT["prompt"],
     )
-    try:
-        with urllib.request.urlopen(req, timeout=15) as resp:
-            model_data = json.load(resp)
-    except Exception as exc:
-        raise RuntimeError("Flow2API preflight failed: " + str(exc))
-    wanted = "models/" + FLOW2["model"]
-    names = {m.get("name") for m in model_data.get("models", [])}
-    if wanted not in names:
-        raise RuntimeError("Flow2API model unavailable: " + FLOW2["model"])
+    client.preflight(PLAN.get("expected_flow_project_id"))
+    FLOWKIT_CLIENT = client
+    print("Flow Kit: extension connected, pinned project ready (NARWHAL, portrait, 1K)", flush=True)
 
 # ---- provider generators: return image bytes or raise ----
 def gen_c2a(t, work):
@@ -215,60 +204,24 @@ def gen_c2a(t, work):
     subprocess.run(args + ["-o", resp, "--max-time", "600"], capture_output=True)
     return _openai_image_bytes(resp, work)
 
-def gen_flow2api_banana2(t, work):
-    if not colored_pencil_enabled():
+def gen_flowkit_banana2(t, work):
+    if not colored_pencil_enabled() and not EPISODE_PENCIL_AUTHORIZED:
         raise RuntimeError("colored-pencil generation temporarily disabled")
     refs = refs_of(t)
     if len(refs) != 1:
-        raise RuntimeError("Flow2API colored-pencil task requires exactly one source ref")
+        raise RuntimeError("Flow Kit colored-pencil task requires exactly one source ref")
     ref = _resolve(refs[0])
     if not os.path.exists(ref):
         raise RuntimeError("ref missing " + os.path.basename(refs[0]))
-    payload = {
-        "systemInstruction": {"parts": [{"text": "Return exactly one image and no prose."}]},
-        "contents": [{
-            "role": "user",
-            "parts": [
-                {"inlineData": {"mimeType": _image_mime(ref), "data": base64.b64encode(open(ref, "rb").read()).decode("ascii")}},
-                {"text": FLOW2["prompt"]},
-            ],
-        }],
-        "generationConfig": {
-            "responseModalities": ["IMAGE"],
-            "imageConfig": {
-                "aspectRatio": FLOW2["aspect_ratio"],
-                "imageSize": FLOW2["image_size"],
-            },
-        },
-    }
-    req = urllib.request.Request(
-        FLOW2_GENERATE,
-        data=json.dumps(payload, ensure_ascii=False).encode("utf-8"),
-        headers={"x-goog-api-key": FLOW2_KEY, "Content-Type": "application/json"},
-        method="POST",
-    )
-    try:
-        with urllib.request.urlopen(req, timeout=420) as resp:
-            body = json.load(resp)
-    except urllib.error.HTTPError as exc:
-        detail = exc.read().decode("utf-8", "replace")[:300]
-        raise RuntimeError("Flow2API HTTP %d: %s" % (exc.code, detail))
-    found = None
-    for candidate in body.get("candidates", []):
-        for part in candidate.get("content", {}).get("parts", []):
-            inline = part.get("inlineData") or part.get("inline_data")
-            if inline and inline.get("data"):
-                found = inline
-                break
-        if found: break
-    if not found:
-        raise RuntimeError("Flow2API returned no inline image")
-    mime = found.get("mimeType") or found.get("mime_type") or "image/jpeg"
-    return _as_png(base64.b64decode(found["data"]), mime, work)
+    source_hash = hashlib.sha256(Path(ref).read_bytes()).hexdigest()
+    identity = os.path.abspath(TASK_JSON) + '\0' + os.path.abspath(OUTDIR) + '\0' + t['file'] + '\0' + source_hash
+    operation_prefix = 'pencil-' + hashlib.sha256(identity.encode('utf-8')).hexdigest()[:40]
+    evidence_dir = os.path.join(TOOLDIR, '运行垃圾', 'tasks', 'flowkit-images', operation_prefix)
+    return FLOWKIT_CLIENT.generate(ref, operation_prefix, evidence_dir)
 
 GENERATORS = {
     "c2a": gen_c2a,
-    "flow2api_banana2": gen_flow2api_banana2,
+    "flowkit_banana2": gen_flowkit_banana2,
 }
 
 # ---- topological layers from refs deps ----
@@ -295,7 +248,7 @@ def run_task(tid, provider):
     outFile = os.path.join(OUTDIR, t["file"])
     if os.path.exists(outFile): return (tid, "SKIP")
     last = ""
-    tries = 1 if provider == "flow2api_banana2" else 6
+    tries = 1 if provider == "flowkit_banana2" else 6
     for attempt in range(tries):
         work = os.path.join(TMP, tid + "_" + uuid.uuid4().hex[:6])
         os.makedirs(work, exist_ok=True)
@@ -314,7 +267,7 @@ def run_task(tid, provider):
     return (tid, "FAIL " + last)
 
 if FLOW_TASK_IDS:
-    preflight_flow2api()
+    preflight_flowkit()
 print("providers: " + ", ".join("%s(cap%d)" % (n, c) for n, c in ALL_PROVIDERS), flush=True)
 print("layers: " + ", ".join("L%d=%d" % (k, len(v)) for k, v in sorted(layers.items())), flush=True)
 ok = fail = skip = 0
@@ -326,7 +279,7 @@ for lyr in sorted(layers):
         futs = [ex.submit(
             run_task,
             tid,
-            "flow2api_banana2" if is_flow2_colored_task(tasks[tid]) else "c2a",
+            "flowkit_banana2" if is_colored_task(tasks[tid]) else "c2a",
         ) for tid in ids]
         for f in futs:
             tid, res = f.result()

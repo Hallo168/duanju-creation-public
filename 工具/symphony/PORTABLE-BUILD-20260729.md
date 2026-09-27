@@ -19,11 +19,11 @@
 
 ## 构建结果
 
-- 产品目录：`<主仓库根>\工具\symphony\dist-product`
-- 产品 ZIP：`<主仓库根>\工具\symphony\dist-product.zip`
+- 产品目录：`<项目根目录>\工具\symphony\dist-product`
+- 产品 ZIP：`<项目根目录>\工具\symphony\dist-product.zip`
 - 完整性清单覆盖：3,672 个文件
 - ZIP 文件数：3,673
-- 当前构建脚本固定使用 `F:\CodexBuild\symphony-product` 作为纯英文编译中间目录，以规避 MSVC 链接器对中文路径的错误解码。
+- 当前构建脚本固定使用 `<本机路径>` 作为纯英文编译中间目录，以规避 MSVC 链接器对中文路径的错误解码。
 - 构建脚本保存为带 BOM 的 UTF-8，确保 Windows PowerShell 5.1 正确解析中文快捷文件名和说明。
 
 最终 ZIP 大小和 SHA-256 以本报告末尾“最终制品”及同目录构建输出为准。
@@ -66,7 +66,7 @@ Codex 没有直接接受它对构建误删的泛化担忧：`Resolve-SafeChild()
 
 最终增量复核包：
 
-- 文件：`<主仓库根>\工具\运行垃圾\tasks\symphony-portable-final-delta-20260729.zip`
+- 文件：`<项目根目录>\工具\运行垃圾\tasks\symphony-portable-final-delta-20260729.zip`
 - 大小：58,789 bytes
 - SHA-256：`0E8C9C11A00432A4657C8BAA24FD9F269178545E55484149767D443EABC34696`
 

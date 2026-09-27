@@ -3,16 +3,16 @@
 本项目把 TikTok Symphony Creative Studio 接入短剧批量生成流程。日常操作入口是：
 
 ```text
-<主仓库根>\工具\symphony_video_batch.py
+<项目根目录>\工具\symphony_video_batch.py
 ```
 
 HTTP 代理源码在：
 
 ```text
-<主仓库根>\工具\symphony
+<项目根目录>\工具\symphony
 ```
 
-这是唯一维护和启动的代理副本。旧目录 `<SymphonyProxy>` 已停用；不要从旧目录启动或修改代码。
+这是唯一维护和启动的代理副本。旧目录 `<本机依赖目录>` 已停用；不要从旧目录启动或修改代码。
 
 当前能力、验证结果和未完成事项见 [STATUS.md](STATUS.md)。
 
@@ -21,7 +21,7 @@ HTTP 代理源码在：
 受控测试包由以下命令构建：
 
 ```powershell
-cd <主仓库根>\工具\symphony
+cd <项目根目录>\工具\symphony
 .\tools\build_product.ps1
 ```
 
@@ -42,9 +42,9 @@ cd <主仓库根>\工具\symphony
 
 | 组件 | 路径 | 作用 |
 |---|---|---|
-| 批量执行器 | `<主仓库根>\工具\symphony_video_batch.py` | 解析分镜、预算、热预存、跨账号调度、账本、轮询、下载和 ffprobe 核验 |
-| HTTP 代理 | `<主仓库根>\工具\symphony` | 统一 API、直连 Symphony、账号切换、任务查询和下载 |
-| OpenCLI 适配器 | `<OpenCLI-Symphony>` | 首次登录、新参考图首次上传、网页故障回退 |
+| 批量执行器 | `<项目根目录>\工具\symphony_video_batch.py` | 解析分镜、预算、热预存、跨账号调度、账本、轮询、下载和 ffprobe 核验 |
+| HTTP 代理 | `<项目根目录>\工具\symphony` | 统一 API、直连 Symphony、账号切换、任务查询和下载 |
+| OpenCLI 适配器 | `<本机依赖目录>` | 首次登录、新参考图首次上传、网页故障回退 |
 | 本机配置 | `工具\symphony\symphony配置.json` | 端口、Node、OpenCLI、ffprobe 和默认账号 |
 | 资产缓存 | `工具\symphony\data\asset_cache.json` | 按本地文件 SHA-256 记录可缓存使用的远端素材 URL |
 
@@ -58,7 +58,7 @@ cd <主仓库根>\工具\symphony
 | 可选时长 | 5、10、12、15 秒 |
 | 参考图 | 最多 9 张 |
 | 计价 | 当前观测约 1 秒 1 积分；实际以平台返回的余额和计费结果为准 |
-| 账号结构 | 主账号（一份独立登录态）下挂子账号；本机当前 2 个主账号共 15 个子账号（`main-a` 5 个：main-a~main-e、`main-b` 10 个），积分与渲染额度按子账号彼此独立 |
+| 账号结构 | 主账号（一份独立登录态）下挂子账号；本机当前 2 个主账号共 15 个子账号（`main-a` 5 个：补1~补5、`main-b` 10 个），积分与渲染额度按子账号彼此独立 |
 | 渲染并发 | 每个子账号最多约 5 条同时渲染 |
 | 提交行为 | 平台可能接收超额排队，但本地执行器与代理实行硬节流：单账号达到 5 条即等待 |
 | 输出 | 常见为 720×1280 或 1080×1920，必须用 ffprobe 核验 |
@@ -66,7 +66,7 @@ cd <主仓库根>\工具\symphony
 平台模型、时长、审核和排队行为可能变化。每个新批次仍须先运行：
 
 ```bat
-cd /d <主仓库根>
+cd /d <项目根目录>
 python 工具\video_provider_catalog.py
 ```
 
@@ -80,7 +80,7 @@ python 工具\video_provider_catalog.py
 - Python 3.11+
 - Node.js 20+
 - Chrome 与 OpenCLI 扩展
-- `<OpenCLI-Symphony>` 已构建
+- `<本机依赖目录>` 已构建
 - ffprobe 可用
 
 ### 2. 配置文件
@@ -88,14 +88,14 @@ python 工具\video_provider_catalog.py
 只修改：
 
 ```text
-<主仓库根>\工具\symphony\symphony配置.json
+<项目根目录>\工具\symphony\symphony配置.json
 ```
 
 主要字段：
 
 - `监听端口`：默认 8765，只绑定 `127.0.0.1`
 - `node`：Node 可执行文件或 `node`
-- `OpenCLI入口`：默认 `<OpenCLI-Symphony>/dist/src/main.js`
+- `OpenCLI入口`：默认 `<本机依赖目录>/dist/src/main.js`
 - `ffprobe`：成片分辨率核验工具
 - `默认主账号`：默认 `main-a`；第二个主账号用命令行 `--main-account main-b` 覆盖
 - `默认账号`：留空使用所选主账号的当前子账号，或填写 `main-a` 等子账号名
@@ -107,7 +107,7 @@ python 工具\video_provider_catalog.py
 首次使用或登录失效时运行：
 
 ```bat
-node <OpenCLI-Symphony>\dist\src\main.js tiktok-symphony direct-session -f json
+node <本机依赖目录>\dist\src\main.js tiktok-symphony direct-session -f json
 ```
 
 登录、验证码、Passkey 或两步验证需要人工在 Chrome 中完成。会话随后加密保存到 Windows 凭据管理器，不应写入仓库、日志或配置文件。
@@ -117,14 +117,14 @@ node <OpenCLI-Symphony>\dist\src\main.js tiktok-symphony direct-session -f json
 启动：
 
 ```bat
-cd /d <主仓库根>\工具\symphony
+cd /d <项目根目录>\工具\symphony
 启动代理.cmd
 ```
 
 也可以：
 
 ```bat
-cd /d <主仓库根>\工具\symphony
+cd /d <项目根目录>\工具\symphony
 uv run python launch.py
 ```
 
@@ -148,7 +148,7 @@ http://127.0.0.1:8765/docs
 以下命令都从项目根目录执行：
 
 ```bat
-cd /d <主仓库根>
+cd /d <项目根目录>
 ```
 
 示例变量：
@@ -321,7 +321,7 @@ stories\<故事>\分镜-15秒\成片\<单元>单元-symphony.mp4
 
 | 主账号别名 / OpenCLI Profile | 子账号数 |
 |---|---:|
-| `main-a` | 5（main-a~main-e） |
+| `main-a` | 5（补1~补5） |
 | `main-b` | 10（2026-08-11 换绑新 TK 账号，别名沿用） |
 
 代理的账号池接口 `/v1/direct/pool` 一次只认一个 `main_account`（一个主账号一份登录态）。
@@ -382,7 +382,7 @@ curl.exe "http://127.0.0.1:8765/v1/direct/credits?main_account=main-b&account=4"
 持久切换第一个主账号里的 `main-a`：
 
 ```bat
-curl.exe -X POST "http://127.0.0.1:8765/v1/direct/accounts/main-a/activate?main_account=main-a"
+curl.exe -X POST "http://127.0.0.1:8765/v1/direct/accounts/补1/activate?main_account=main-a"
 ```
 
 正式生成请求示例：
@@ -393,7 +393,7 @@ curl.exe -X POST "http://127.0.0.1:8765/v1/direct/accounts/main-a/activate?main_
   "account": "4",
   "backend": "direct",
   "prompt": "……",
-  "refs": [".\\……\\角色.jpg"],
+  "refs": ["<本机路径>"],
   "mode": "reference",
   "model": "Dreamina Seedance 2.0",
   "duration": 15,
@@ -412,7 +412,7 @@ curl.exe "http://127.0.0.1:8765/v1/direct/pool?main_account=main-b"
 
 ```bat
 curl.exe "http://127.0.0.1:8765/v1/direct/pool?accounts=main-a&accounts=main-b"
-curl.exe "http://127.0.0.1:8765/v1/direct/pool?accounts=main-a,legacy-a"
+curl.exe "http://127.0.0.1:8765/v1/direct/pool?accounts=main-a,main-a"
 ```
 
 账号池接口会先取一次账号目录，再为每个账号创建独立客户端并发查询余额和在渲数；单账号失败不会影响其余结果，返回顺序保持账号目录顺序。
@@ -475,7 +475,7 @@ curl.exe "http://127.0.0.1:8765/v1/direct/pool?accounts=main-a,legacy-a"
 代理：
 
 ```bat
-cd /d <主仓库根>\工具\symphony
+cd /d <项目根目录>\工具\symphony
 uv run pytest
 uv run python -m compileall -q app tests
 ```
@@ -483,7 +483,7 @@ uv run python -m compileall -q app tests
 OpenCLI Symphony 专项：
 
 ```bat
-cd /d <OpenCLI-Symphony>
+cd /d <本机依赖目录>
 npx vitest run --project adapter clis/tiktok-symphony
 npm run typecheck
 npm run build
@@ -503,4 +503,4 @@ npm run build
 - [项目现状](STATUS.md)
 - [账号池性能优化验收](PERFORMANCE-OPTIMIZATION-20260729.md)
 - [热预存后台化研究与真实测试](WARMUP-BACKEND-RESEARCH-20260729.md)
-- `<主仓库根>\knowledge\视频生成规范.md`
+- `<项目根目录>\knowledge\视频生成规范.md`

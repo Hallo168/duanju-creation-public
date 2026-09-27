@@ -1,8 +1,8 @@
-param(
+﻿param(
     [string]$OutputDir = "",
-    [string]$OpenCliRoot = "<OpenCLI-Symphony>",
+    [string]$OpenCliRoot = "<本机依赖目录>",
     [string]$NodeExe = "",
-    [string]$FfprobeExe = "<本地工具目录>\ffprobe.exe",
+    [string]$FfprobeExe = "<本机路径>",
     [string]$CompilerRoot = "",
     [switch]$ReuseCompiled
 )
@@ -20,7 +20,7 @@ if (-not $CompilerRoot) {
     $CompilerRoot = if ($env:SYMPHONY_BUILD_ROOT) {
         $env:SYMPHONY_BUILD_ROOT
     } else {
-        "F:\CodexBuild"
+        "<本机路径>"
     }
 }
 

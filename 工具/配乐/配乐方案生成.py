@@ -7,18 +7,16 @@
 段落表由 agent 按 .claude/skills/houqi/知识/后期规范.md 写，只填"哪段是什么情绪、用哪首曲子"，
 音量/起截点/淡化由本脚本算。段落起点二选一：`起单元`（取单元边界并吸附字幕间隙）
 或 `绝对时间`（秒，精确钉在情绪句上——2026-08-06 三段式骨架的主用法）；
-`"类型": "静默"`（可无曲目）＝刻意留白段：上一段音乐到此为止、下一段从自己的
-起点进，静默后进场默认不淡入（规范 M2/M3）：
+中间对白连续铺乐；`"类型": "静默"`（可无曲目）仅用于M4片尾静默收，放在末条：
 
 {
-  "草稿": "<剪映草稿根目录>/21-还有口气",
+  "草稿": "<本机路径> Drafts/21-还有口气",
   "时间轴": "工具/运行垃圾/tasks/21/时间轴.json",
-  "对白音频": "<主仓库根>/stories/21-还有口气/21-还有口气.mp4",
+  "对白音频": "<项目根目录>/stories/21-还有口气/21-还有口气.mp4",
   "输出目录": "工具/运行垃圾/tasks/21",
   "段落": [
     {"label": "开场焦虑", "绝对时间": 3.9, "类型": "压迫", "曲目": "BGM/剧情纠结焦虑紧张 Especially main version.mp3"},
-    {"label": "温情裸奏", "绝对时间": 41.2, "类型": "静默"},
-    {"label": "主床进场", "绝对时间": 65.4, "类型": "低谷", "曲目": "BGM/Asphyxia(窒息).mp3"},
+    {"label": "主床进场", "绝对时间": 41.2, "类型": "低谷", "曲目": "BGM/Asphyxia(窒息).mp3"},
     {"label": "尾曲跳副歌", "起单元": 27, "类型": "打脸", "曲目": "BGM/Asphyxia(窒息).mp3", "source_start": 147.5}
   ],
   "环境": [
@@ -88,7 +86,7 @@ def measure_window(audio: Path, start: float, duration: float) -> float | None:
     text = _run([FFMPEG, "-hide_banner", "-nostats", "-ss", f"{start:.3f}",
                  "-t", f"{max(duration, 1.0):.3f}", "-i", audio,
                  "-af", "ebur128=framelog=quiet", "-f", "null", "-"])
-    match = re.search(r"I:\s*(-?\d+\.?\d*)\s*LUFS", text)
+    match = re.search(r"<本机路径>)\s*LUFS", text)
     return float(match.group(1)) if match else None
 
 
@@ -145,7 +143,7 @@ def build(spec_path: Path) -> dict:
 
     # ---- BGM 段落 ----
     # 起点：`绝对时间`（精确钉情绪句）优先，否则 `起单元`（吸附字幕间隙）。
-    # `"类型": "静默"`（或无曲目）＝刻意留白：上一段到此为止，下一段从自己的起点进（M2 三段式骨架）。
+    # `"类型": "静默"`（或无曲目）保留为片尾静默收的表示；中段按M2连续铺乐。
     entries = []
     for item in spec["段落"]:
         if "绝对时间" in item:
@@ -325,7 +323,7 @@ def build(spec_path: Path) -> dict:
         elif gap > 0.001 and not current.get("_静默后进"):
             warnings.append(
                 f"「{previous['label']}」与「{current['label']}」之间有 {gap:.1f}s 缝但没声明静默段——"
-                "是刻意留白就在段落表加一条 \"类型\": \"静默\""
+                "中间对白应连续铺乐，请衔接前后段"
             )
     tail_silence = bool(entries) and entries[-1][2]
     if segments and abs(segments[-1]["end"] - duration) > 0.05 and not tail_silence:

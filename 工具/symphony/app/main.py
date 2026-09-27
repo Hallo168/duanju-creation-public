@@ -874,7 +874,7 @@ def create_app(
         prepare-only 的 return 之前，submitComposer 在其之后）。
 
         必须经这个端点走，不要在别处直接调 OpenCLI：OpenCLI 的缓存路径默认硬编码指向已停用的
-        工具/symphony，本进程的 SYMPHONY_ASSET_CACHE 会由子进程继承从而写对地方。
+        <本机路径> SYMPHONY_ASSET_CACHE 会由子进程继承从而写对地方。
         """
         missing = [ref for ref in body.refs if not Path(ref).is_file()]
         if missing:

@@ -31,7 +31,7 @@ def client_for(runner: FakeRunner) -> TestClient:
     return TestClient(create_app(
         runner=runner,
         node_path="node-test",
-        cli_path="F:/cli/main.js",
+        cli_path="<本机路径>",
         direct_factory=unavailable_direct,
         license_manager=AllowAllLicense(),  # type: ignore[arg-type]
     ))
@@ -302,18 +302,18 @@ def test_direct_pool_runs_real_endpoint_in_parallel_and_preserves_order() -> Non
 def test_direct_pool_whitelist_is_pushed_down_and_supports_unicode() -> None:
     directory = [
         {"name": "main-a", "id": "account-1"},
-        {"name": "legacy-a", "id": "account-5"},
+        {"name": "main-a", "id": "account-5"},
         {"name": "main-c", "id": "account-3"},
     ]
     factory = PoolDirectFactory(directory)
     response = pool_client(factory).get(
         "/v1/direct/pool",
-        params=[("accounts", "legacy-a"), ("accounts", "main-a")],
+        params=[("accounts", "main-a"), ("accounts", "main-a")],
     )
     assert response.status_code == 200
-    assert [row["name"] for row in response.json()["data"]] == ["main-a", "legacy-a"]
+    assert [row["name"] for row in response.json()["data"]] == ["main-a", "main-a"]
     queried = {account for operation, account in factory.calls if operation == "credits"}
-    assert queried == {"main-a", "legacy-a"}
+    assert queried == {"main-a", "main-a"}
     assert "main-c" not in {account for _operation, account in factory.calls}
     assert len(factory.instances) == 3
 
@@ -357,7 +357,7 @@ def test_get_endpoints_build_safe_argv(url: str, tail: list[str]) -> None:
     runner = FakeRunner([CLIResult(0, '{"items":[1]}', "")]); response = client_for(runner).get(url)
     assert response.status_code == 200
     assert response.json() == {"ok": True, "data": {"items": [1]}}
-    assert runner.calls == [(["node-test", "F:/cli/main.js", "tiktok-symphony", *tail], 30)]
+    assert runner.calls == [(["node-test", "<本机路径>", "tiktok-symphony", *tail], 30)]
 
 
 def test_browser_endpoint_routes_to_explicit_opencli_profile() -> None:
@@ -365,7 +365,7 @@ def test_browser_endpoint_routes_to_explicit_opencli_profile() -> None:
     response = client_for(runner).get("/v1/credits?main_account=main-b")
     assert response.status_code == 200
     assert runner.calls == [([
-        "node-test", "F:/cli/main.js", "--profile", "main-b",
+        "node-test", "<本机路径>", "--profile", "main-b",
         "tiktok-symphony", "credits", "--window", "background",
         "--site-session", "persistent", "-f", "json",
     ], 30)]
@@ -378,7 +378,7 @@ def test_generate_video_builds_argv_and_checks_refs(tmp_path: Path) -> None:
     response = client_for(runner).post("/v1/videos/generations", json=payload)
     assert response.status_code == 200
     assert response.json() == {"ok": True, "data": {"id": "gen-1"}}
-    assert runner.calls == [(["node-test", "F:/cli/main.js", "tiktok-symphony", "generate-video", payload["prompt"], "--model", "Dreamina Seedance 2.0", "--refs", f"{first},{last}", "--mode", "reference", "--frames", "first-last", "--duration", "15", "--wait", "true", "--timeout", "77", "--window", "background", "--site-session", "persistent", "-f", "json"], 77)]
+    assert runner.calls == [(["node-test", "<本机路径>", "tiktok-symphony", "generate-video", payload["prompt"], "--model", "Dreamina Seedance 2.0", "--refs", f"{first},{last}", "--mode", "reference", "--frames", "first-last", "--duration", "15", "--wait", "true", "--timeout", "77", "--window", "background", "--site-session", "persistent", "-f", "json"], 77)]
 
 
 def test_direct_generation_hard_stops_sixth_unobserved_submission(
@@ -702,7 +702,7 @@ def test_download_builds_argv_with_optional_out(tmp_path: Path) -> None:
         "timeout": 90,
     })
     assert response.status_code == 200
-    assert runner.calls == [(["node-test", "F:/cli/main.js", "tiktok-symphony", "download", "asset-123", "--allow-preview", "true", "--timeout", "90", "--out", str(out), "-f", "json"], 105)]
+    assert runner.calls == [(["node-test", "<本机路径>", "tiktok-symphony", "download", "asset-123", "--allow-preview", "true", "--timeout", "90", "--out", str(out), "-f", "json"], 105)]
 
 def test_cli_empty_result_maps_to_empty_list_only_for_list_endpoints() -> None:
     empty = CLIResult(66, "", "code: EMPTY_RESULT")

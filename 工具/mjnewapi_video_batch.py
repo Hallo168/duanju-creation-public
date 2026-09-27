@@ -116,7 +116,7 @@ def item_quote(price,item):
     return {'billing_mode':mode,'unit_price_yuan':float(rate),'billable_quantity':quantity,'budget_yuan':float(rate*Decimal(str(quantity)))}
 
 def output_geometry_matches(width,height,resolution,aspect_ratio):
-    if resolution not in ['480p','720p']:return False
+    if resolution not in ['480p','720p','1080p']:return False
     short_edge=int(resolution[:-1])
     if min(width,height)!=short_edge:return False
     ratio_width,ratio_height=map(int,aspect_ratio.split(':'))
@@ -329,7 +329,7 @@ def recover(client,args):
 def main():
     p=argparse.ArgumentParser(description='MJNewAPI视频生成与技术交付')
     p.add_argument('mode',choices=['preflight','upload','submit','poll','recover'])
-    p.add_argument('--story-root',required=True);p.add_argument('--prompt-file',default='分镜-15秒/分镜提示词.md')
+    p.add_argument('--story-root',required=True);p.add_argument('--prompt-file',default='分镜-30秒/分镜提示词.md')
     p.add_argument('--units',default='1');p.add_argument('--model');p.add_argument('--resolution',default='720p')
     p.add_argument('--task-dir',required=True);p.add_argument('--ledger');p.add_argument('--confirm-cost',type=float)
     p.add_argument('--task-id',help='仅recover使用已有平台任务号，绝不重发创建请求')

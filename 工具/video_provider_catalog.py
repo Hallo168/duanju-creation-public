@@ -49,6 +49,11 @@ def token_for(provider: dict) -> str:
     if source:
         field = str(provider.get("credential_field") or "KEY")
         text = Path(source).read_text(encoding="utf-8-sig")
+        if provider.get("credential_format") == "sk_token":
+            matches = set(re.findall(r"\bsk-[A-Za-z0-9_.-]+", text))
+            if len(matches) != 1:
+                raise RuntimeError("凭据文件须包含唯一的 sk- 密钥")
+            return matches.pop()
         found = re.search(r"(?im)^" + re.escape(field) + r"\s*[:：]\s*(\S+)", text)
         if not found:
             raise RuntimeError("凭据文件缺少指定密钥字段")
@@ -72,10 +77,18 @@ def request_models(provider: dict, timeout: float = 30) -> object:
         headers["Authorization"] = f"Bearer {token}"
     request = urllib.request.Request(url, headers=headers)
     try:
-        with urllib.request.urlopen(request, timeout=timeout) as response:
+        # Do not forward bearer credentials to a redirect destination.
+        class NoRedirect(urllib.request.HTTPRedirectHandler):
+            def redirect_request(self, *args, **kwargs):
+                return None
+        with urllib.request.build_opener(NoRedirect).open(request, timeout=timeout) as response:
             return json.loads(response.read().decode("utf-8"))
     except urllib.error.HTTPError as exc:
-        detail = exc.read().decode("utf-8", "replace")[:300]
+        detail = exc.read().decode("utf-8", "replace")
+        credential = headers.get("Authorization", "").removeprefix("Bearer ")
+        if credential:
+            detail = detail.replace(credential, "[REDACTED]")
+        detail = detail[:300]
         raise RuntimeError(f"HTTP {exc.code}: {detail}") from exc
     except (urllib.error.URLError, TimeoutError, ValueError) as exc:
         raise RuntimeError(f"网络请求失败: {exc}") from exc
@@ -100,7 +113,7 @@ def video_model_rows(payload: object) -> list[object]:
     """Keep video-capable rows when a general-purpose model endpoint exposes them."""
     rows = model_rows(payload)
     explicit_capabilities = any(isinstance(row, dict) and "supported_endpoint_types" in row for row in rows)
-    explicit_type = any(isinstance(row, dict) and "type" in row for row in rows)
+    explicit_type = any(isinstance(row, dict) and ("type" in row or "category" in row) for row in rows)
     if not explicit_capabilities and not explicit_type:
         return rows
     selected = []
@@ -111,10 +124,30 @@ def video_model_rows(payload: object) -> list[object]:
         if isinstance(capabilities, str):
             capabilities = [capabilities]
         capability_match = any("video" in str(value).lower() for value in capabilities)
-        type_match = "video" in str(row.get("type") or "").lower()
+        type_match = "video" in str(row.get("type") or row.get("category") or "").lower()
         if capability_match or type_match:
             selected.append(row)
     return selected
+
+
+def compact_yfai_model(row: dict) -> dict:
+    """Keep display/capability facts within the workbench subprocess output limit.
+
+    Full parameter schemas are fetched independently by the submit executor.
+    Descriptions and translated option labels otherwise repeat hundreds of KB.
+    """
+    result = {key: row[key] for key in ("id", "name", "display_name", "category", "type", "available", "deprecated") if key in row}
+    result["description"] = str(row.get("description") or "")[:1200]
+    kept = ("type", "enum", "default", "required", "min", "max", "minimum", "maximum", "max_items", "max_bytes", "max_edge_px", "available_when", "required_when")
+    result["param_schema"] = {}
+    for name, spec in (row.get("param_schema") or {}).items():
+        if not isinstance(spec, dict):
+            continue
+        compact = {key: spec[key] for key in kept if key in spec}
+        if "enum" not in compact and spec.get("options"):
+            compact["enum"] = [option["value"] for option in spec["options"] if "value" in option]
+        result["param_schema"][name] = compact
+    return result
 
 
 def main() -> int:
@@ -146,7 +179,15 @@ def main() -> int:
     for name, provider in selected.items():
         item = {"provider": name, "kind": provider.get("kind"), "base_url": provider.get("base_url")}
         try:
-            item["models"] = video_model_rows(request_models(provider, timeout=args.timeout))
+            payload = request_models(provider, timeout=args.timeout)
+            if name == "meaicc_video":
+                # MEAICC labels w-3 as openai, despite its video endpoint.
+                item["models"] = [row for row in model_rows(payload)
+                                  if isinstance(row, dict) and row.get("id") == provider.get("default_model")]
+            else:
+                item["models"] = video_model_rows(payload)
+            if name == "yfai_video":
+                item["models"] = [compact_yfai_model(row) for row in item["models"]]
         except RuntimeError as exc:
             item["error"] = str(exc)
             status = 1

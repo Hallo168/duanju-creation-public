@@ -551,7 +551,7 @@ def main() -> int:
     parser.add_argument("--base-url", default=None, help="覆盖统一 API 配置中的 base_url")
     parser.add_argument("--model", default="")
     parser.add_argument("--resolution", default=None, help="已确认模型的分辨率；省略时按实时模型表唯一匹配")
-    parser.add_argument("--prompt-file", default="分镜提示词.md")
+    parser.add_argument("--prompt-file", default="分镜-30秒/分镜提示词.md")
     parser.add_argument("--grid-dir", default=None, help="相对故事目录的宫格版本目录")
     parser.add_argument("--allow-partial-grids", action="store_true")
     parser.add_argument("--concurrency", type=int, default=3)
