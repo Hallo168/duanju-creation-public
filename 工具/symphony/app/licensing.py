@@ -93,7 +93,7 @@ def _machine_guid() -> str:
 def _system_volume_serial() -> str:
     if sys.platform != "win32":
         return ""
-    root = Path(os.environ.get("SystemRoot", r"C:\Windows")).anchor or "C:\\"
+    root = Path(os.environ.get("SystemRoot", r"./Windows")).anchor or "./"
     serial = ctypes.c_uint32()
     ok = ctypes.windll.kernel32.GetVolumeInformationW(
         ctypes.c_wchar_p(root),

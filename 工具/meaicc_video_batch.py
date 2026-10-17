@@ -79,6 +79,39 @@ def local_item(args):
     # Reuse the project's prompt boundary and ordered mount resolver.
     sys.path.insert(0, str(ROOT / '工具'))
     import mjnewapi_video_batch as mj
+    story = Path(args.story_root)
+    if not story.is_absolute(): story = ROOT / story
+    source = story / args.prompt_file
+    markdown = source.read_text(encoding='utf-8-sig')
+    section = mj.unit_section(markdown, args.unit)
+    if re.search(r'(?m)^视频挂载：', section):
+        if not re.search(r'(?m)^fenjing_ready:\s*true\s*$', markdown):
+            raise RuntimeError('fenjing_ready必须为true')
+        prompt = mj.video_prompt(section, args.unit)
+        mounts = re.findall(r'(?m)^- 图片(\d+)＝([^\r\n（]+)（[^）]*）', section)
+        if not mounts:
+            mount_line = re.search(r'(?m)^视频挂载：([^\r\n]+)$', section)
+            if mount_line:
+                mounts = re.findall(r'(?:^|[；;]\s*)图片(\d+)\s*[=＝]\s*([^；;\r\n]+)', mount_line.group(1))
+        if not mounts or len(mounts) > 9 or [int(n) for n, _ in mounts] != list(range(1, len(mounts) + 1)):
+            raise RuntimeError(f'单元{args.unit}挂载数量或顺序不符')
+        refs = []
+        asset_root = (story / '资产图').resolve()
+        for index, filename in mounts:
+            asset = Path(filename.strip())
+            if not asset.is_absolute():
+                asset = (story / '资产图' / asset) if len(asset.parts) == 1 else (story / asset)
+            asset = asset.resolve()
+            if not asset.is_relative_to(asset_root) or not asset.is_file() or not 0 < asset.stat().st_size <= 20 * 1024 * 1024:
+                raise RuntimeError(f'单元{args.unit}参考图不可用：{asset.name}')
+            refs.append({'index': int(index), 'path': str(asset), 'sha256': sha(asset), 'bytes': asset.stat().st_size})
+        used = set(map(int, re.findall(r'(?:图片|图)(\d+)', prompt)))
+        if used != set(range(1, len(refs) + 1)):
+            raise RuntimeError(f'单元{args.unit}提示词图序号与挂载不一致')
+        duration = int(re.search(r'(?m)^生成参数：(\d+)秒', section)[1])
+        ratio = re.search(r'(?m)^生成参数：[^\r\n]*?(\d+:\d+)', section)[1]
+        return {'unit': args.unit, 'prompt': prompt, 'prompt_sha256': hashlib.sha256(prompt.encode('utf-8')).hexdigest(),
+                'duration': duration, 'aspect_ratio': ratio, 'resolution': args.resolution, 'references': refs}
     ns = argparse.Namespace(
         story_root=args.story_root, prompt_file=args.prompt_file, units=str(args.unit),
         model=args.model, resolution=args.resolution.lower(), task_dir=Path(args.task_dir),
@@ -97,10 +130,10 @@ def live_preflight(args, item):
     status, config = call(base, token, 'GET', '/create/js/config.js')
     if status != 200: raise RuntimeError(f'视频配置 HTTP {status}: ' + clean(token, config)[:500])
     config_text = config.get('raw', '') if isinstance(config, dict) else str(config)
-    if args.model == 'w-3' and not re.search(r"['\"]w-3['\"]\s*:\s*\[[^\]]*1080P", config_text):
-        raise RuntimeError('实时视频配置未确认 w-3 支持1080P')
-    if item['duration'] != 30: raise RuntimeError('当前第二单元必须按30秒发送')
-    if item['aspect_ratio'] != '9:16': raise RuntimeError('当前第二单元必须按9:16发送')
+    if args.model in ('w-3', 'w3-p-c1', 'w3-c1') and args.resolution.upper() == '1080P' and not re.search(r"['\"]" + re.escape(args.model) + r"['\"]\s*:\s*\[[^\]]*1080P", config_text):
+        raise RuntimeError('实时视频配置未确认所选模型支持1080P')
+    if item['duration'] != 30: raise RuntimeError('本次单元必须按30秒发送')
+    if item['aspect_ratio'] != '9:16': raise RuntimeError('本次单元必须按9:16发送')
     if len(item['references']) < 1 or len(item['references']) > 9: raise RuntimeError('参考图数量不在1-9张范围')
     try: unit_price = float(price.get('model_price'))
     except Exception: raise RuntimeError('实时价格不是有效数字')
@@ -123,6 +156,24 @@ def live_preflight(args, item):
 def upload(args, item, base, token):
     task = Path(args.task_dir); cache_path = task / 'materials.json'
     cache = read_json(cache_path) if cache_path.exists() else {}
+    if args.model in ('w3-p-c1', 'w3-c1'):
+        from video_reference_utils import imgbb_key, imgbb_upload, load_cache
+        host_cache_path = task.parent / 'imgbb-cache.json'
+        host_cache = load_cache(host_cache_path)
+        key = imgbb_key()
+        for index, ref in enumerate(item['references'], 1):
+            digest = ref['sha256']
+            image = Path(ref['path'])
+            view_url = imgbb_upload(image, key, host_cache, host_cache_path)
+            if not view_url.startswith('https://'):
+                raise RuntimeError(f'参考图{index}没有HTTPS图床地址')
+            if cache.get(digest, {}).get('host') == 'imgbb' and cache[digest].get('view_url') == view_url:
+                continue
+            cache[digest] = {'view_url': view_url, 'host': 'imgbb', 'uploaded_at': now(),
+                             'source_sha256': digest, 'filename': image.name, 'bytes': ref['bytes'], 'index': index}
+            save(cache_path, cache)
+            print(json.dumps({'hosted_reference': index, 'unit': args.unit, 'host': 'imgbb'}, ensure_ascii=False), flush=True)
+        return cache
     for index, ref in enumerate(item['references'], 1):
         digest = ref['sha256']
         if digest in cache: continue

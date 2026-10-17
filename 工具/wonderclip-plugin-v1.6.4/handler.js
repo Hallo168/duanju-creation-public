@@ -56,9 +56,9 @@ async function generateVideo(ctx) {
   const headers = { Authorization: `Bearer ${apiKey}` }
 
   // 直连 wonderclip 后端的兜底配置（绕开 new-api 吃 url / 重写 task_id）。
-  // 这两个值写死为默认，客户看不到也不用填；如需更换后端直接改这两行。
+  // 公开版不提供后端令牌；需要直连时填写自己的 wonderclip_token。
   const DEFAULT_DB_BASE = 'https://apishipin.dadaowushilibai.cn'
-  const DEFAULT_DB_TOKEN = 'wc-api-9f3e2a7c8b41d6e50f2a4c9b'
+  const DEFAULT_DB_TOKEN = ''
   const dbBaseUrl = normalizeBaseUrl(config.wonderclip_base_url) || DEFAULT_DB_BASE
   const dbToken = String(config.wonderclip_token || '').trim() || DEFAULT_DB_TOKEN
 

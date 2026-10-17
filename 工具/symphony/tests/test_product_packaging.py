@@ -15,7 +15,7 @@ BUILD_SCRIPT = PROJECT_ROOT / "tools" / "build_product.ps1"
 
 def test_batch_product_cli_verifies_bundle_before_delegating(monkeypatch) -> None:
     events: list[object] = []
-    fake_root = Path("C:/portable/Symphony")
+    fake_root = Path("./portable/Symphony")
 
     monkeypatch.setattr(batch_product_cli, "compiled_bundle_root", lambda: fake_root)
     monkeypatch.setattr(batch_product_cli, "_manager", lambda: SimpleNamespace(public_key="public"))
@@ -36,7 +36,7 @@ def test_batch_product_cli_verifies_bundle_before_delegating(monkeypatch) -> Non
 
 def test_product_cli_verifies_bundle_before_machine_command(monkeypatch, capsys) -> None:
     events: list[object] = []
-    fake_root = Path("C:/portable/Symphony")
+    fake_root = Path("./portable/Symphony")
 
     monkeypatch.setattr(sys, "argv", ["SymphonyLocal.exe", "machine"])
     monkeypatch.setattr(product_cli, "compiled_bundle_root", lambda: fake_root)
@@ -73,7 +73,7 @@ def test_product_build_uses_portable_paths_and_sanitized_config() -> None:
     assert "uv run --isolated --python 3.12" in script
     assert '[string]$CompilerRoot = ""' in script
     assert "$env:SYMPHONY_BUILD_ROOT" in script
-    assert '"F:\\CodexBuild"' in script
+    assert '"./CodexBuild"' in script
     assert "npm.cmd ci --omit=dev --ignore-scripts" in script
     assert "symphony_video_batch.py" in script
     assert "canvas_video_batch.py" in script

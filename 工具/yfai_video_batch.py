@@ -142,7 +142,10 @@ class Client:
         if not 200 <= status < 300:
             detail = data.get("error", {}) if isinstance(data, dict) else {}
             raise ApiError(status, self.clean(data)[:1200], detail.get("code") if isinstance(detail, dict) else None)
-        if not isinstance(data, dict) or data.get("error"):
+        task_failure = (name == "detail" and isinstance(data, dict)
+                        and data.get("status") == "failed" and data.get("is_final") is True
+                        and str(data.get("id") or data.get("task_id") or "") == str(task_id))
+        if not isinstance(data, dict) or (data.get("error") and not task_failure):
             raise ApiError(status, self.clean(data)[:1200])
         return data
 
@@ -245,7 +248,7 @@ def local_inputs(args):
                 dimensions = list(img.size)
                 img.verify()
             refs.append({"path": str(ref), "sha256": digest(ref.read_bytes()), "bytes": ref.stat().st_size, "dimensions": dimensions})
-        indexes = set(map(int, re.findall(r"图片(\d+)", prompt)))
+        indexes = set(map(int, re.findall(r"(?:图片|图)(\d+)", prompt)))
         if indexes != set(range(1, len(refs) + 1)):
             raise RuntimeError(f"单元{unit}的图片编号与挂载顺序不一致")
         duration = re.search(r"(?m)^生成参数：\s*(\d+)秒", section)
@@ -266,12 +269,25 @@ def money(value):
     return amount
 
 
+def model_route(client, model):
+    return dict((getattr(client, "provider", {}).get("model_routes") or {}).get(model) or {})
+
+
 def quote(client, model, params):
-    data = client.call("estimate", {"model": model, "modality": "video", "params": params, "include_all_channels": True})
+    route = model_route(client, model)
+    payload = {"model": model, "modality": "video", "params": params, "include_all_channels": True}
+    if route.get("lane_id"):
+        payload["pinned_lane_id"] = route["lane_id"]
+    data = client.call("estimate", payload)
+    if route.get("lane_id"):
+        channels = data.get("channels") or []
+        if (data.get("vendor") != route["vendor"] or not channels
+                or any(row.get("lane") != route["lane_id"] for row in channels)):
+            raise RuntimeError("平台估价未锁定指定渠道，已停止")
     values = {name: float(money(data.get(name))) for name in ("effective_total_rmb", "max_effective_total_rmb", "required_freeze_rmb")}
     if values["max_effective_total_rmb"] < values["effective_total_rmb"]:
         raise RuntimeError("平台费用上下限不一致")
-    return {**values, "price_basis": data.get("price_basis"), "strategy": data.get("strategy"), "vendor": data.get("vendor")}
+    return {**values, "price_basis": data.get("price_basis"), "strategy": data.get("strategy"), "vendor": data.get("vendor"), "lane_id": route.get("lane_id")}
 
 
 def walk(value):
@@ -296,14 +312,21 @@ def leaves(value):
 
 
 def dry_run(client, model, params):
+    route = model_route(client, model)
+    payload = {"model_id": model, "modality": "video", "params": params}
+    if route.get("lane_id"):
+        payload["lane_id"] = route["lane_id"]
     try:
-        data = client.call("dry_run", {"model_id": model, "modality": "video", "params": params})
+        data = client.call("dry_run", payload)
     except ApiError as exc:
         if exc.status == 501 and exc.code == "dry_run_transport_not_instrumented":
             return {"verified": False, "warning": "该上游暂不支持免费转发验证；已核对公开参数和费用，实际素材接收及输出参数待正式生成后核验。"}
         raise
     if data.get("would_call_vendor") is not False:
         raise RuntimeError("零费用验证响应不符合预期")
+    if route.get("lane_id") and (data.get("pinned_lane") != route["lane_id"]
+                                or (data.get("wire") or {}).get("vendor") != route["vendor"]):
+        raise RuntimeError("平台转发未锁定指定渠道，已停止")
     if params.get("images") and not (data.get("reference_check") or {}).get("present_in_vendor_body"):
         raise RuntimeError("平台转发请求丢失参考图，已停止")
     body = (data.get("wire") or {}).get("body")
@@ -314,11 +337,22 @@ def dry_run(client, model, params):
             raise RuntimeError("无法核对平台实际转发的参数") from None
     pairs = list(walk(body))
     urls = params.get("images", [])
-    if urls and [value for value in leaves(body) if isinstance(value, str) and value in urls] != urls:
-        raise RuntimeError("平台转发的参考图数量或顺序发生变化，已停止")
+    if urls:
+        image_fields = ("images", "imageUrls", "image_urls", "referenceImages", "reference_image_urls")
+        groups = [list(leaves(value)) for key, value in pairs if key in image_fields and isinstance(value, list)]
+        if not groups:
+            groups = [[value for value in leaves(body) if isinstance(value, str) and value in urls]]
+        if any(group != urls for group in groups):
+            raise RuntimeError("平台转发的参考图数量或顺序发生变化，已停止")
     if any(str(value) != "1" for key, value in pairs if key in ("n", "count") and not isinstance(value, (dict, list))):
         raise RuntimeError("平台转发的生成数量不是 1，已停止")
-    for name, aliases in {"duration": ("duration", "seconds", "duration_seconds"), "resolution": ("resolution",), "aspect_ratio": ("aspect_ratio", "ratio", "aspectRatio"), "prompt": ("prompt",)}.items():
+    duration_aliases = ("duration", "seconds", "duration_seconds", "video_duration")
+    # This TYJP adapter sends duration=1 alongside the actual seconds in video_duration.
+    if (model == "wan-3-0-special" and (data.get("wire") or {}).get("vendor") == "TYJP"
+            and any(key == "video_duration" for key, _ in pairs)
+            and all(str(value) == "1" for key, value in pairs if key == "duration")):
+        duration_aliases = ("seconds", "duration_seconds", "video_duration")
+    for name, aliases in {"duration": duration_aliases, "resolution": ("resolution",), "aspect_ratio": ("aspect_ratio", "ratio", "aspectRatio"), "prompt": ("prompt",)}.items():
         values = [v for k, v in pairs if k in aliases and not isinstance(v, (dict, list))]
         if not values or any(str(value) != str(params[name]) for value in values):
             raise RuntimeError(f"平台转发的 {name} 与所选值不一致或无法核实，已停止")
@@ -344,7 +378,7 @@ def make_plan(client, args):
     totals = {name: float(sum(money(row["quote"][name]) for row in checks)) for name in ("effective_total_rmb", "max_effective_total_rmb", "required_freeze_rmb")}
     balance = client.call("balance")
     available = float(money((balance.get("credits") or {}).get("available")))
-    plan = {"provider": PROVIDER, "base_url": client.base, "created_at": now(), "expires_at": time.time() + 600,
+    plan = {"provider": PROVIDER, "base_url": client.base, "route": model_route(client, args.model), "created_at": now(), "expires_at": time.time() + 600,
             "inputs": inputs, "input_hash": digest(inputs), "checks": checks, "totals": totals, "available_credits": available}
     if args.plan:
         save(args.plan, plan)
@@ -388,6 +422,9 @@ def submit(client, args):
             raise RuntimeError("账本已有创建记录；请按任务号对账，禁止重复提交")
         plan = read(args.plan)
         inputs = local_inputs(args)
+        route = model_route(client, args.model)
+        if plan.get("route", {}) != route:
+            raise RuntimeError("指定渠道在预检后发生变化，请重新预检")
         if plan.get("provider") != PROVIDER or plan.get("base_url") != client.base or time.time() > plan["expires_at"] or plan.get("input_hash") != digest(inputs) or digest(plan["inputs"]) != digest(inputs):
             raise RuntimeError("预检已过期、提示词、模型或参考图已变化，请重新预检")
         if Path(str(args.plan) + ".used").exists():
@@ -421,6 +458,8 @@ def submit(client, args):
         for item, params, current in prepared:
             request_id = "yfai-" + uuid.uuid4().hex
             body = {"model": args.model, **params, "client_request_id": request_id}
+            if route.get("lane_id"):
+                body["lane_id"] = route["lane_id"]
             unit = item["unit"]
             save(directory / f"unit{unit}-request.json", body)
             base = {"unit": unit, "model": args.model, "client_request_id": request_id, "duration": item["duration"],
@@ -567,13 +606,14 @@ def poll(client, args):
 
 
 def main():
+    provider = read_config()["providers"][PROVIDER]
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("action", choices=["check", "preflight", "submit", "poll", "status"])
     parser.add_argument("--story-root")
     parser.add_argument("--prompt-file", default="分镜-30秒/分镜提示词.md")
     parser.add_argument("--units", default="")
-    parser.add_argument("--model", default="")
-    parser.add_argument("--resolution", default="720p")
+    parser.add_argument("--model", default=provider.get("default_model", ""))
+    parser.add_argument("--resolution", default=provider.get("defaults", {}).get("resolution", "720p"))
     parser.add_argument("--plan")
     parser.add_argument("--ledger")
     parser.add_argument("--task-dir")

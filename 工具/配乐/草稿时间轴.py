@@ -96,6 +96,8 @@ def parse_fenjing(path: Path) -> tuple[list[dict], dict]:
         # 避免误收主体定义、约束句等正文里的引号内容。
         lines = re.findall(r"^\s*-\s*[^\n“]+）“([^”]*)”\s*$", block, re.M)
         if not lines:
+            lines = re.findall(r'^[^\n“"：:]+(?:说道|回答|喊道|叫道|问道|喝道|反问|继续说)[：:]\s*[“"]([^”"]*)[”"]\s*$', block, re.M)
+        if not lines:
             lines = re.findall(r"\{([^{}]*)\}", block)
         units.append(
             {

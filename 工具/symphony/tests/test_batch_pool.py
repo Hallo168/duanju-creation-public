@@ -27,23 +27,23 @@ def test_account_pool_pushes_allowed_accounts_with_url_encoding(monkeypatch) -> 
         return {
             "data": [
                 {"name": "main-a", "credits": 1000, "generating": 0, "limit": 5},
-                {"name": "main-a", "credits": 900, "generating": 1, "limit": 5},
+                {"name": "legacy-a", "credits": 900, "generating": 1, "limit": 5},
             ]
         }
 
     monkeypatch.setattr(batch, "api_json", fake_api_json)
     rows = batch.account_pool(
         "http://127.0.0.1:8765",
-        ["main-a", "main-a"],
+        ["main-a", "legacy-a"],
     )
 
     parsed = urllib.parse.urlsplit(str(seen["url"]))
     assert parsed.path == "/v1/direct/pool"
     assert urllib.parse.parse_qs(parsed.query) == {
-        "accounts": ["main-a", "main-a"],
+        "accounts": ["main-a", "legacy-a"],
     }
     assert seen["timeout"] == 180
-    assert [row["name"] for row in rows] == ["main-a", "main-a"]
+    assert [row["name"] for row in rows] == ["main-a", "legacy-a"]
 
 
 def test_account_pool_without_whitelist_keeps_plain_endpoint(monkeypatch) -> None:

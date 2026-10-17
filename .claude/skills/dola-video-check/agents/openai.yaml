@@ -1,0 +1,4 @@
+interface:
+  display_name: "Dola视频检查"
+  short_description: "检查Dola对白，重提3次仍失败转Wan 3.0 1080P，Wan免对白检查"
+  default_prompt: "使用 $dola-video-check 检查指定Dola批次的实际成片对白，失败单元自动原样重提；累计重提3次仍无可用结果时转Wan 3.0 1080P，Wan免对白检查，保留成功视频和旧账本。"

@@ -27,7 +27,7 @@ DLL 路径解析顺序：
     5. 内置常量 DEFAULT_INSTALL_DIR 兜底
 
 JY_INSTALL_DIR 要指向【包含 videoeditor.dll 的那个版本目录】，例如：
-    F:\\剪映\\JianyingPro\\10.7.0.14095
+    ./剪映\\JianyingPro\\10.7.0.14095
 """
 import os
 import re
@@ -39,13 +39,13 @@ from pathlib import Path
 log = logging.getLogger("jianying.jy_crypto")
 
 # 内置兜底常量（本机已确认存在）
-DEFAULT_INSTALL_DIR = r"F:\剪映\JianyingPro\10.7.0.14095"
+DEFAULT_INSTALL_DIR = r"./剪映\JianyingPro\10.7.0.14095"
 
 # 自动探测的搜索根
 _SEARCH_ROOTS = [
-    r"F:\剪映\JianyingPro", r"E:\剪映\JianyingPro", r"D:\剪映\JianyingPro",
-    r"C:\Program Files\JianyingPro", r"D:\JianyingPro", r"E:\JianyingPro",
-    r"F:\JianyingPro",
+    r"./剪映\JianyingPro", r"./剪映\JianyingPro", r"./剪映\JianyingPro",
+    r"./Program Files\JianyingPro", r"./JianyingPro", r"./JianyingPro",
+    r"./JianyingPro",
     os.path.expandvars(r"%LOCALAPPDATA%\JianyingPro\Apps"),
 ]
 

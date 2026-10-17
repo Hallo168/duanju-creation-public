@@ -157,8 +157,14 @@ def prepare_units(
     for unit in units:
         section = unit_section(markdown, unit)
         prompt = video_prompt(section, unit)
-        tokens = mount_tokens(section, unit)
-        paths = [resolve_mount(story_root, token, unit, resolved_grid_dir) for token in tokens]
+        linked_mounts = re.findall(r"^- 图片(\d+)：[^\r\n]*\]\(\.\./资产图/([^)\r\n]+)\)\s*$", section, re.M)
+        if linked_mounts:
+            if len(linked_mounts) > 9 or [int(n) for n, _ in linked_mounts] != list(range(1, len(linked_mounts) + 1)):
+                raise ValueError(f"单元{unit}挂载编号或数量错误")
+            paths = [story_root / "资产图" / filename for _, filename in linked_mounts]
+        else:
+            tokens = mount_tokens(section, unit)
+            paths = [resolve_mount(story_root, token, unit, resolved_grid_dir) for token in tokens]
         for path in paths:
             if not path.is_file() or path.stat().st_size == 0:
                 raise FileNotFoundError(path)

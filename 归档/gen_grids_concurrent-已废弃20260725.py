@@ -5,10 +5,10 @@
 import json, os, re, sys, shutil, base64, uuid, subprocess, time
 from concurrent.futures import ThreadPoolExecutor
 
-TASK_JSON = sys.argv[1] if len(sys.argv) > 1 else r"<主仓库根>\工具\宫格任务-07-polo.json"
+TASK_JSON = sys.argv[1] if len(sys.argv) > 1 else r".\工具\宫格任务-07-polo.json"
 MAXW = int(sys.argv[2]) if len(sys.argv) > 2 else 6
 
-CFG = json.load(open(r"<主仓库根>\工具\api-config.json", encoding="utf-8"))
+CFG = json.load(open(r".\工具\api-config.json", encoding="utf-8"))
 PLAN = json.load(open(TASK_JSON, encoding="utf-8"))
 OUTDIR = PLAN["output_dir"]
 ENDPOINT = CFG["base_url"].rstrip("/") + "/v1/images/edits"

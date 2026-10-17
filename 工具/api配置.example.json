@@ -1,22 +1,56 @@
 {
-  "_note": "生图配置按 providers 登记：普通资产使用 chatgpt2api；彩铅专用 flowkit_banana2 服从 工具/生产开关.json。统一入口为 工具/gen_grids_multi.py，不设自动备用生图通道。",
+  "_note": "普通资产暂停 chatgpt2api，直接使用当前会话内置生图；彩铅专用 aihubkit_gemini_image 服从 工具/生产开关.json。工具/gen_grids_multi.py 仅用于当前启用的彩铅任务，不设自动备用生图通道。",
+  "colored_pencil_defaults": {
+    "provider": "aihubkit_gemini_image"
+  },
   "video_defaults": {
-    "provider": "meaicc_video",
-    "model": "w-3",
-    "resolution": "1080P",
+    "provider": null,
+    "model": null,
+    "resolution": "1080p",
     "duration": 30,
     "aspect_ratio": "9:16"
   },
   "providers": {
+    "jiasu_video": {
+      "kind": "async_video_generation",
+      "label": "佳速 API",
+      "base_url": "https://ai.jiasuapi.com",
+      "auth": "bearer",
+      "credential_file": "",
+      "credential_field": "api_key",
+      "selection": "explicit_user_choice",
+      "executor": "工具/jiasu_video_batch.py",
+      "doc": "工具/佳速视频渠道.md",
+      "submit_retry": "never_automatic",
+      "poll_interval_seconds": 60
+    },
+    "poloai_image": {
+      "kind": "image_generation",
+      "base_url": "https://poloai.top",
+      "model": "gemini-3-pro-image-preview-c",
+      "protocol": "gemini_native",
+      "auth": "bearer",
+      "credential_file": "",
+      "credential_field": "KEY",
+      "endpoints": {
+        "models": "GET /v1/models",
+        "generate": "POST /v1beta/models/{model}:generateContent"
+      },
+      "aspect_ratio": "9:16",
+      "image_size": "1K",
+      "concurrency": 3,
+      "scope": "用户指定的本集彩铅临时通道；不更改默认Flow路由"
+    },
     "meaicc_video": {
       "kind": "async_video_generation",
       "label": "MEAICC",
       "base_url": "https://api.meaicc.com",
       "auth": "bearer",
+      "credential_env_override": "MEAICC_CC_API_KEY",
       "credential_file": "",
       "credential_field": "key",
       "default_model": "w-3",
-      "selection": "default",
+      "selection": "explicit_user_choice",
       "executor": "工具/meaicc_video_batch.py",
       "endpoints": {
         "models": "GET /v1/models",
@@ -28,6 +62,7 @@
       "submit_retry": "never_automatic"
     },
     "chatgpt2api": {
+      "disabled": true,
       "kind": "openai_compatible",
       "doc": "",
       "base_url": "http://127.0.0.1:8000",
@@ -46,19 +81,17 @@
       "preflight": "跑批前先 curl /v1/models 确认后端活着且 gpt-image-2 在列；面板账号列表为空 = 号池未导入或进程内存态过期（重启后端）。后端未起时脚本会整批失败。",
       "timing": "文生图 ~30s/张，多参考图 edits ~95s/张（实测 2026-07-16）"
     },
-    "flowkit_banana2": {
-      "kind": "flowkit_image_edit",
-      "doc": "",
-      "base_url": "http://127.0.0.1:8100",
-      "model": "NARWHAL",
+    "aihubkit_gemini_image": {
+      "kind": "gemini_image_edit",
+      "base_url": "https://apimodel.aihubkit.com",
+      "api_key": "",
+      "model": "gemini-3.1-flash-image-preview",
       "aspect_ratio": "9:16",
       "image_size": "1K",
       "prompt": "不改变图片，把图片风格转换成素描彩铅画",
       "concurrency": 1,
-      "auth": "使用已登录 Chrome 中的 Flow Kit 扩展；账号会话留在浏览器，不读取 Flow2API Token/AT 或 setting.toml",
-      "routing": "仅处理带单张写实人物参考图的彩铅参考图；强制 9:16、1K、固定提示词，不允许回退到其他 provider",
-      "output": "Flow Kit 原图下载后由 ffmpeg 解码转存 PNG，保持现有资产文件契约",
-      "preflight": "核对 /health 的扩展连接与 /api/flow/status 的 batch 通道、固定项目及冷却状态；旧任务 provider=flow2api_banana2 仅作为此渠道的兼容别名"
+      "doc": "",
+      "routing": "仅接收同角色同状态的单张写实参考图；固定模型、9:16、1K及原提示词，无自动备用通道"
     },
     "canvas_video": {
       "kind": "video_generation",
@@ -99,7 +132,7 @@
       "local_proxy": {
         "启动": "双击 工具/symphony/启动代理.cmd（或 cd 工具/symphony && uv run python launch.py）",
         "本机配置": "工具/symphony/symphony配置.json（端口/OpenCLI入口/ffprobe/默认主账号/默认子账号）——改端口要同步改本条 base_url",
-        "端口占用说明": ""
+        "端口占用说明": "./tiktok-symphony-proxy 是同一份代码的历史原件，同端口，已停用不再启动；日常只启动项目内这一份"
       },
       "endpoints": {
         "models": "GET {base_url}/v1/models",
@@ -115,8 +148,8 @@
       "canonical_request_shape": {
         "prompt": "<单元提示词正文，UTF-8>",
         "refs": [
-          "",
-          ""
+          "./stories/29-示例/资产图/R1-彩铅三视图.png",
+          "./stories/29-示例/资产图/S1-场景全景.png"
         ],
         "mode": "reference",
         "model": "Dreamina Seedance 2.0",
@@ -260,42 +293,10 @@
       "submit_retry": "never_automatic",
       "poll_interval_seconds": 30
     },
-    "yfai_video": {
-      "kind": "async_video_generation",
-      "label": "YFAI",
-      "base_url": "https://yf.token6688.com",
-      "auth": "bearer",
-      "credential_env_override": "YFAI_API_KEY",
-      "credential_file": "",
-      "credential_format": "sk_token",
-      "selection": "explicit_user_choice",
-      "executor": "工具/yfai_video_batch.py",
-      "doc": "Google下载/YFAI-API文档-概览-2026-09-12.md",
-      "endpoints": {
-        "models": "GET /v1/logical-models",
-        "public_models": "GET /v1/skills/models?type=video",
-        "balance": "GET /v1/skills/balance",
-        "estimate": "POST /v1/pricing-estimate",
-        "dry_run": "POST /api/v1/model-runtime/dry-run",
-        "files": "POST /v1/files",
-        "submit": "POST /v1/videos/generations",
-        "detail": "GET /v1/tasks/{task_id}"
-      },
-      "defaults": {
-        "duration": 15,
-        "aspect_ratio": "9:16",
-        "resolution": "720p"
-      },
-      "reference_mode": "provider_public_https_urls",
-      "submit_retry": "never_automatic",
-      "poll_interval_seconds": 10,
-      "model_policy": "完整模型名、参数合法值与费用按实时目录和本批选择核对，不设置渠道内默认模型。工作台仅展示支持15秒、9:16、720p和多图参考模式的可用模型。",
-      "routing_note": "按YFAI密钥现有调度策略选上游；预检显示实付估价、备用上限和预冻结额。本地执行器不自动换provider或重投。"
-    },
     "dolasd_video": {
       "kind": "async_video_generation",
       "label": "Dolasd",
-      "base_url": "https://dolasd.xyz",
+      "base_url": "https://ylaigc.xyz",
       "auth": "bearer",
       "credential_env_override": "DOLASD_API_KEY",
       "credential_file": "",
@@ -319,6 +320,154 @@
       "pricing": "unknown_no_public_price_endpoint",
       "submit_retry": "never_automatic",
       "poll_interval_seconds": 30
+    },
+    "lnlovetlr_video": {
+      "kind": "async_video_generation",
+      "label": "小宁API（用户指定测试）",
+      "base_url": "https://api.lnlovetlr.cloud",
+      "auth": "bearer",
+      "credential_file": "",
+      "credential_field": "KEY",
+      "selection": "explicit_user_choice",
+      "default_model": "sd2.5_30",
+      "executor": ".\\工具\\运行垃圾\\tasks\\138-两个许春苗-lnlovetlr-20261009-01a11fad-v1\\submit_test.py",
+      "doc": "",
+      "endpoints": {
+        "models": "GET /v1/models",
+        "submit": "POST /v1/videos",
+        "detail": "GET /v1/videos/{task_id}",
+        "download": "GET /v1/videos/{task_id}/content"
+      },
+      "defaults": {
+        "duration": 30,
+        "ratio": "9:16",
+        "resolution": "720p"
+      },
+      "reference_upload_url": "https://video.lnlovetlr.cloud/api/workbench/reference"
+    },
+    "lnlovetlr_sd25720mx_video": {
+      "kind": "async_video_generation",
+      "label": "小宁API · SD2.5720MX",
+      "base_url": "https://api.lnlovetlr.cloud",
+      "auth": "bearer",
+      "credential_file": "",
+      "credential_field": "KEY",
+      "selection": "explicit_user_choice",
+      "default_model": "SD2.5720MX",
+      "executor": "工具/lnlovetlr_video_batch.py",
+      "doc": "工具/lnlovetlr视频渠道.md",
+      "catalog_url": "https://video.lnlovetlr.cloud/api/docs/models",
+      "reference_upload_url": "https://video.lnlovetlr.cloud/api/workbench/reference",
+      "endpoints": {
+        "models": "GET /v1/models",
+        "submit": "POST /v1/videos",
+        "detail": "GET /v1/videos/{task_id}",
+        "artifacts": "GET /v1/tasks/{task_id}/artifacts",
+        "download": "GET /v1/videos/{task_id}/content"
+      },
+      "defaults": {
+        "duration": 30,
+        "ratio": "9:16",
+        "resolution": "720p"
+      },
+      "reference_mode": "public_https_images"
+    },
+    "xinfeng_video": {
+      "kind": "async_video_generation",
+      "label": "新风（Xinfeng）",
+      "base_url": "https://xinfeng.best",
+      "auth": "bearer",
+      "credential_file": "",
+      "credential_field": "KEY",
+      "pricing_url": "https://xinfeng.best/pricing",
+      "doc": "工具/新风视频渠道.md",
+      "models": [
+        "wan3.0-video",
+        "wan3.0-video-prime",
+        "wan3.0-video-A"
+      ],
+      "selection": "user_explicit_only",
+      "endpoints": {
+        "models": "GET /v1/models"
+      }
+    },
+    "qsqs_video": {
+      "kind": "async_video_generation",
+      "label": "QS · LEO-WAN3-480P",
+      "base_url": "https://qsqs.org",
+      "auth": "bearer",
+      "credential_file": "",
+      "credential_field": "KEY",
+      "credential_env_override": "QSQS_VIDEO_API_KEY",
+      "default_model": "LEO-WAN3-480P",
+      "selection": "explicit_user_choice",
+      "executor": "工具/qsqs_video_batch.py",
+      "doc": "工具/QS视频渠道.md",
+      "endpoints": {
+        "models": "GET /v1/models",
+        "capabilities": "GET /api/workbench-models",
+        "pricing": "GET /api/pricing",
+        "submit": "POST /v1/videos",
+        "detail": "GET /v1/videos/{task_id}",
+        "download": "GET /v1/videos/{task_id}/content"
+      },
+      "defaults": {
+        "duration": 30,
+        "resolution": "480p",
+        "ratio": "9:16"
+      },
+      "reference_mode": "public_https_urls_local_images_via_imgbb",
+      "submit_retry": "explicit_same_idempotency_key_and_body",
+      "poll_interval_seconds": 5
+    },
+    "zm_video": {
+      "kind": "async_video_generation",
+      "label": "ZM",
+      "base_url": "https://apimodel.aihubkit.com",
+      "auth": "bearer",
+      "credential_file": "",
+      "credential_field": "KEY",
+      "default_model": "seedance-2.5_k1",
+      "selection": "explicit_user_choice",
+      "executor": "工具/zm_video_batch.py",
+      "doc": "工具/ZM视频渠道.md",
+      "endpoints": {
+        "models": "GET /v1/models",
+        "submit": "POST /v1/videos",
+        "detail": "GET /v1/videos/{task_id}",
+        "download": "GET /v1/videos/{task_id}/content"
+      },
+      "defaults": {
+        "duration": 30,
+        "resolution": "720p",
+        "ratio": "9:16"
+      },
+      "reference_upload_provider": "lnlovetlr_video"
+    },
+    "wanwan_video": {
+      "kind": "async_video_generation",
+      "label": "万万（慢速）",
+      "base_url": "https://wanwan.coolhs.com",
+      "auth": "bearer",
+      "credential_file": "",
+      "credential_field": "KEY",
+      "credential_env_override": "WANWAN_VIDEO_API_KEY",
+      "selection": "explicit_user_choice",
+      "doc": "工具/万万视频渠道.md",
+      "executor": "工具/wanwan_video_batch.py",
+      "api_doc_url": "https://wanwan.coolhs.com/docs#auth",
+      "endpoints": {
+        "models": "GET /v1/models",
+        "ride": "GET /v1/ride",
+        "card_info": "GET /api/portal/me",
+        "references": "POST /api/portal/media",
+        "submit": "POST /v1/videos",
+        "detail": "GET /v1/videos/{task_id}",
+        "download": "GET /v1/videos/{task_id}/content"
+      },
+      "reference_mode": "multipart_input_reference",
+      "submit_retry": "never_automatic",
+      "poll_interval_seconds": 1800
     }
   },
   "imgbb": {

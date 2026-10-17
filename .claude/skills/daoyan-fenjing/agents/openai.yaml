@@ -1,0 +1,4 @@
+interface:
+  display_name: "导演分镜"
+  short_description: "独立试验导演的影视化改编、人物行动和镜头节奏，保留成熟分镜版本"
+  default_prompt: "使用 $daoyan-fenjing 为指定剧本制作一套独立导演分镜，按影视化需要调整台词和动作，供我对比。"

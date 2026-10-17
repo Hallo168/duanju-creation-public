@@ -30,9 +30,9 @@ GET  /openapi/v1/video-generations/{id}         轮询直到 succeeded/failed
 每个请求都必须带上 API Key。支持以下任意一种请求头(三选一):
 
 ```
-Authorization: Bearer sk-xxxxxxxxxxxxxxxx
-x-api-key: sk-xxxxxxxxxxxxxxxx
-x-goog-api-key: sk-xxxxxxxxxxxxxxxx
+Authorization: Bearer <API_KEY>
+x-api-key: <API_KEY>
+x-goog-api-key: <API_KEY>
 ```
 
 - 缺少 Key → `HTTP 401`
@@ -475,7 +475,7 @@ function verify(rawBody, headerSig, apiKey) {
 
 ```bash
 BASE="{BASE_URL}"
-KEY="sk-xxxxxxxxxxxxxxxx"
+KEY="<API_KEY>"
 
 # 1) 查询可用模型
 curl -s "$BASE/openapi/v1/video-generations/models" \

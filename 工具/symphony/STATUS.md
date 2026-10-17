@@ -1,8 +1,8 @@
 # TikTok Symphony 视频通道项目现状
 
-更新时间：2026-07-29  
-规范源码：`<项目根目录>\工具\symphony`  
-批量入口：`<项目根目录>\工具\symphony_video_batch.py`
+更新时间：2026-07-29
+规范源码：`.\工具\symphony`
+批量入口：`.\工具\symphony_video_batch.py`
 
 本文只记录当前仍有效的实现、验证和风险。历史事故只保留结论，不再混入日常使用步骤。
 
@@ -150,7 +150,7 @@ OpenCLI 全量 adapter 基线曾得到 4,771 passed、11 failed；失败集中�
 7. 网页账号切换偶发菜单失败，无法作为无人值守主路径。
 8. 全账号池查询串行，重复账号目录和身份请求。
 9. 账号白名单只在批处理本地过滤，未下推到代理。
-10. （2026-08-02）warmup 落在已限额子账号的 workspace 上报「无法切换到模型」：代理 `/v1/assets/warmup` 新增 `account` 字段，进面板前先 `account --use` 切到执行器挑好的未限额子账号（`pick_warmup_target` 已选到子账号粒度）。**同时修了 <本机依赖目录>\clis\tiktok-symphony\account.js 两处**：①账号菜单改为悬停触发，点击会把刚弹开的菜单又关上——openAccountMenu 现在先纯悬停等 8 秒、失败才回退真点击；②中文界面下菜单行是全角冒号「ID：」，三处正则改为 `ID[:：]`。**这两处补丁在上游项目里，若 F 盘项目被更新/重装会丢，需按本条复查**。
+10. （2026-08-02）warmup 落在已限额子账号的 workspace 上报「无法切换到模型」：代理 `/v1/assets/warmup` 新增 `account` 字段，进面板前先 `account --use` 切到执行器挑好的未限额子账号（`pick_warmup_target` 已选到子账号粒度）。**同时修了 ./OpenCLI-Symphony\clis\tiktok-symphony\account.js 两处**：①账号菜单改为悬停触发，点击会把刚弹开的菜单又关上——openAccountMenu 现在先纯悬停等 8 秒、失败才回退真点击；②中文界面下菜单行是全角冒号「ID：」，三处正则改为 `ID[:：]`。**这两处补丁在上游项目里，若 F 盘项目被更新/重装会丢，需按本条复查**。
 
 11. （2026-08-02）池视图不含提交闸门的短时保留，批量调度器视图偏乐观白吃 429：`/v1/direct/pool` 与 `/v1/direct/generating-count` 现在回报 `reserved`/`effective`（与提交口同一把 AccountCapacityGate 对账，平台计数跟上后按增量回收），执行器把 reserved 折进在渲数记账。同时给执行器加了 `submit --watch` 一条龙（提交完自动轮询下载；`unknown_outcome` 停批时不进入轮询）。跨进程并发提交的最终仲裁仍是代理提交口的容量闸门（fail-closed，429 不建任务不扣分），**不需要**执行器侧文件锁。
 
@@ -258,4 +258,4 @@ OpenCLI 全量 adapter 基线曾得到 4,771 passed、11 failed；失败集中�
 - [使用指南](README.md)
 - [账号池性能优化验收](PERFORMANCE-OPTIMIZATION-20260729.md)
 - [热预存后台化研究与真实测试](WARMUP-BACKEND-RESEARCH-20260729.md)
-- `<项目根目录>\knowledge\视频生成规范.md`
+- `.\knowledge\视频生成规范.md`

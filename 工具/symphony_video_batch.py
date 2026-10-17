@@ -141,7 +141,7 @@ def api_json(url: str, method: str = "GET", payload: dict | None = None, timeout
 
 
 def account_query(account: str | None, main_account: str | None = None) -> str:
-    """子账号名可能含中文（如 main-a），不编码会让 http.client 直接抛 UnicodeEncodeError。"""
+    """子账号名可能含中文（如 legacy-a），不编码会让 http.client 直接抛 UnicodeEncodeError。"""
     params: list[tuple[str, str]] = []
     if account:
         params.append(("account", str(account)))

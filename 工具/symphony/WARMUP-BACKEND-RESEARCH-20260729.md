@@ -99,7 +99,7 @@ upload_reference(path, account) -> stable_asset_url
 
 测试资产：
 
-- 文件：`<项目根目录>\工具\运行垃圾\tasks\symphony-warmup-probe-20260729\codex-warmup-probe.png`
+- 文件：`.\工具\运行垃圾\tasks\symphony-warmup-probe-20260729\codex-warmup-probe.png`
 - 内容：Codex 生成的无用户数据测试图
 - 大小：6,391 bytes
 - SHA-256：`B28967C5E7B8ADA50F0897F812F47462E6A9BFA2660BAB0F5D230B60B5BE2673`

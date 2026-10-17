@@ -6,7 +6,7 @@ import os
 from pathlib import Path
 import tempfile
 import unittest
-from unittest.mock import patch
+from unittest.mock import MagicMock, patch
 
 from PIL import Image
 import yfai_video_batch as y
@@ -32,6 +32,7 @@ class FakeClient:
         self.task_result = {"id": "task-real-id", "status": "pending"}
         self.model = copy.deepcopy(MODEL)
         self.available = 100
+        self.provider = {}
 
     def clean(self, value):
         return str(value)
@@ -43,11 +44,14 @@ class FakeClient:
         if name == "balance":
             return {"credits": {"available": self.available}}
         if name == "estimate":
-            return {k: self.quote_value for k in ("effective_total_rmb", "max_effective_total_rmb", "required_freeze_rmb")}
+            result = {k: self.quote_value for k in ("effective_total_rmb", "max_effective_total_rmb", "required_freeze_rmb")}
+            if payload.get("pinned_lane_id"):
+                result.update(vendor="HON", channels=[{"lane": payload["pinned_lane_id"]}])
+            return result
         if name == "dry_run":
             p = payload["params"]
-            return {"would_call_vendor": False, "reference_check": {"present_in_vendor_body": True},
-                    "wire": {"vendor": "test", "body": json.dumps({"seconds": p["duration"], "ratio": p["aspect_ratio"], "resolution": p["resolution"], "prompt": p["prompt"], "image_urls": p.get("images", []), "n": 1})}}
+            return {"would_call_vendor": False, "pinned_lane": payload.get("lane_id"), "reference_check": {"present_in_vendor_body": True},
+                    "wire": {"vendor": "HON" if payload.get("lane_id") else "test", "body": json.dumps({"seconds": p["duration"], "ratio": p["aspect_ratio"], "resolution": p["resolution"], "prompt": p["prompt"], "image_urls": p.get("images", []), "n": 1})}}
         if name == "files":
             index = sum(n == "files" for n, _, _ in self.calls)
             return {"url": f"https://cdn.test/ref{index}.png"}
@@ -58,6 +62,45 @@ class FakeClient:
         if name == "detail":
             return self.task_result
         raise AssertionError(name)
+
+
+class YfaiClientResponseTests(unittest.TestCase):
+    def client(self, data, status=200):
+        response = MagicMock()
+        response.code = status
+        response.read.return_value = json.dumps(data).encode("utf-8")
+        response.__enter__.return_value = response
+        client = y.Client({"base_url": "https://yf.test", "api_key": "offline-token",
+                           "endpoints": {"detail": "GET /v1/videos/{task_id}", "submit": "POST /v1/videos"}})
+        client.opener = MagicMock()
+        client.opener.open.return_value = response
+        return client
+
+    def test_failed_task_detail_is_returned_instead_of_query_error(self):
+        data = {"id": "original-task", "status": "failed", "is_final": True,
+                "failure_definitive": True, "error_class": "upstream_outage",
+                "error": {"message": "生成失败，请稍后重试"}}
+        client = self.client(data)
+        result = client.call("detail", task_id="original-task")
+        self.assertEqual(result, data)
+        self.assertEqual(y.task_state(result), "failed")
+        req = client.opener.open.call_args.args[0]
+        self.assertEqual(req.get_method(), "GET")
+        self.assertEqual(req.full_url, "https://yf.test/v1/videos/original-task")
+        client.opener.open.assert_called_once()
+
+    def test_api_errors_still_raise_for_detail_and_creation(self):
+        failure = {"id": "original-task", "status": "failed", "is_final": True,
+                   "error": {"message": "生成失败"}}
+        cases = [("detail", {"error": {"message": "无权限"}}, 200),
+                 ("detail", failure, 503), ("detail", {**failure, "id": "other-task"}, 200),
+                 ("detail", {**failure, "is_final": False}, 200), ("submit", failure, 200)]
+        for name, data, status in cases:
+            with self.subTest(name=name, data=data, status=status):
+                client = self.client(data, status)
+                with self.assertRaises(y.ApiError):
+                    client.call(name, task_id="original-task")
+                client.opener.open.assert_called_once()
 
 
 class YfaiTests(unittest.TestCase):
@@ -169,6 +212,35 @@ class YfaiTests(unittest.TestCase):
                 self.assertEqual(sum(n == "submit" for n, _, _ in self.client.calls), count + 1)
                 self.assertEqual(y.ledger_rows(self.args.ledger)[-1]["status"], "unknown_outcome")
 
+    def test_pinned_lane_survives_estimate_dry_run_and_submission(self):
+        lane = "live-video@HON:default"
+        self.client.provider = {"model_routes": {"live-video": {"lane_id": lane, "vendor": "HON"}}}
+        self.plan()
+        self.submit()
+        for name, payload, _ in self.client.calls:
+            if name in ("estimate", "dry_run", "submit"):
+                self.assertEqual(payload["pinned_lane_id" if name == "estimate" else "lane_id"], lane)
+                self.assertNotIn("lane_id", payload.get("params", {}))
+        self.assertEqual(y.model_route(self.client, "another-model"), {})
+
+    def test_changed_or_ignored_pinned_lane_blocks_submission(self):
+        route = {"lane_id": "live-video@HON:default", "vendor": "HON"}
+        self.client.provider = {"model_routes": {"live-video": route}}
+        plan = self.plan()
+        route["lane_id"] = "live-video@OTHER:default"
+        with self.assertRaisesRegex(RuntimeError, "渠道.*变化"):
+            self.submit()
+        self.assertNotIn("files", [n for n, _, _ in self.client.calls])
+        route["lane_id"] = "live-video@HON:default"
+        params = plan["checks"][0]["params"]
+        with patch.object(self.client, "call", return_value={"vendor": "OTHER", "channels": [{"lane": "other"}]}):
+            with self.assertRaisesRegex(RuntimeError, "估价未锁定"):
+                y.quote(self.client, "live-video", params)
+        with patch.object(self.client, "call", return_value={"would_call_vendor": False, "pinned_lane": route["lane_id"], "wire": {"vendor": "OTHER"}}):
+            with self.assertRaisesRegex(RuntimeError, "转发未锁定"):
+                y.dry_run(self.client, "live-video", params)
+        self.assertNotIn("submit", [n for n, _, _ in self.client.calls])
+
     def test_changed_prompt_reference_and_price_block_creation(self):
         self.plan()
         self.prompt.write_text(self.markdown.replace("逐字", "全部"), encoding="utf-8")
@@ -194,6 +266,47 @@ class YfaiTests(unittest.TestCase):
             with patch.object(self.client, "call", return_value=response):
                 with self.assertRaisesRegex(RuntimeError, "数量或顺序"):
                     y.dry_run(self.client, "live-video", params)
+
+    def test_dry_run_checks_each_reference_alias_independently(self):
+        params = self.plan()["checks"][0]["params"]
+        response = self.client.call("dry_run", {"params": params})
+        body = json.loads(response["wire"]["body"])
+        for field in ("images", "imageUrls"):
+            body[field] = list(params["images"])
+        response["wire"]["body"] = json.dumps(body)
+        with patch.object(self.client, "call", return_value=response):
+            self.assertTrue(y.dry_run(self.client, "live-video", params)["verified"])
+        for field in ("images", "imageUrls", "image_urls"):
+            for changed in ([], params["images"][:1], list(reversed(params["images"])),
+                            params["images"] + ["https://cdn.test/unexpected.png"]):
+                with self.subTest(field=field, changed=changed):
+                    altered = {**body, field: changed}
+                    response["wire"]["body"] = json.dumps(altered)
+                    with patch.object(self.client, "call", return_value=response):
+                        with self.assertRaisesRegex(RuntimeError, "数量或顺序"):
+                            y.dry_run(self.client, "live-video", params)
+
+    def test_wan_special_tyjp_uses_video_duration_without_relaxing_other_adapters(self):
+        params = {**self.plan()["checks"][0]["params"], "duration": "30"}
+        response = self.client.call("dry_run", {"params": params})
+        body = json.loads(response["wire"]["body"])
+        del body["seconds"]
+        body.update(duration=1, video_duration=30)
+        response["wire"].update(vendor="TYJP", body=json.dumps(body))
+        with patch.object(self.client, "call", return_value=response):
+            self.assertTrue(y.dry_run(self.client, "wan-3-0-special", params)["verified"])
+            with self.assertRaisesRegex(RuntimeError, "duration"):
+                y.dry_run(self.client, "live-video", params)
+        for changed in ({"video_duration": 15}, {"duration": 2}):
+            with self.subTest(changed=changed):
+                response["wire"]["body"] = json.dumps({**body, **changed})
+                with patch.object(self.client, "call", return_value=response):
+                    with self.assertRaisesRegex(RuntimeError, "duration"):
+                        y.dry_run(self.client, "wan-3-0-special", params)
+        response["wire"].update(vendor="other", body=json.dumps(body))
+        with patch.object(self.client, "call", return_value=response):
+            with self.assertRaisesRegex(RuntimeError, "duration"):
+                y.dry_run(self.client, "wan-3-0-special", params)
 
     def test_needs_review_and_downloading_are_not_final(self):
         for data in ({"status": "needs_review", "is_final": False}, {"status": "processing", "stage": "downloading", "is_final": False}, {"status": "completed", "is_final": False, "output_url": "https://cdn.test/a.mp4"}):

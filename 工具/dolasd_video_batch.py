@@ -8,6 +8,7 @@ from datetime import datetime, timezone
 import hashlib
 import json
 import os
+import re
 from pathlib import Path
 import shutil
 import subprocess
@@ -20,6 +21,20 @@ from video_provider_catalog import read_config, token_for, model_rows
 
 PROVIDER = "dolasd_video"
 ROOT = Path(__file__).resolve().parent.parent
+
+def parse_unit(value):
+    text = str(value)
+    if not re.fullmatch(r"\d+(?:\.\d+)?", text):
+        raise ValueError("Unit must be a nonnegative integer or fractional label")
+    number = float(text)
+    return int(number) if number.is_integer() else number
+
+def unit_file_prefix(value):
+    if value is None:
+        return ""
+    unit = parse_unit(value)
+    label = f"{unit:02d}" if isinstance(unit, int) else str(unit)
+    return label + "单元-"
 
 
 def now() -> str:
@@ -309,7 +324,8 @@ def poll(client: Client, args: argparse.Namespace) -> int:
         print(json.dumps({"task_id": task_id, "remote_status": remote}, ensure_ascii=False))
         if remote in ("completed", "succeeded", "success"):
             args.output_dir.mkdir(parents=True, exist_ok=True)
-            target = args.output_dir / f"dolasd-{task_id}.mp4"
+            unit_prefix = unit_file_prefix(state.get("unit"))
+            target = args.output_dir / f"{unit_prefix}dolasd-{task_id}.mp4"
             if target.exists():
                 raise RuntimeError(f"Output already exists: {target}")
             temp = args.output_dir / f"dolasd-{task_id}.{uuid.uuid4().hex}.part"
@@ -318,7 +334,7 @@ def poll(client: Client, args: argparse.Namespace) -> int:
             video = next((stream for stream in raw.get("streams", []) if stream.get("codec_type") == "video"), {})
             audio = next((stream for stream in raw.get("streams", []) if stream.get("codec_type") == "audio"), {})
             if video.get("codec_name") != "h264" or audio.get("codec_name") != "aac":
-                original = args.output_dir / f"dolasd-{task_id}-original.mp4"
+                original = args.output_dir / f"{unit_prefix}dolasd-{task_id}-original.mp4"
                 if original.exists():
                     raise RuntimeError(f"Original output already exists: {original}")
                 temp.rename(original)
@@ -351,7 +367,7 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Dolasd video channel: check, one-shot submit, poll and verify")
     parser.add_argument("mode", choices=("check", "submit", "poll"))
     parser.add_argument("--prompt-file")
-    parser.add_argument("--unit", type=int, help="Storyboard unit number for the task ledger")
+    parser.add_argument("--unit", type=parse_unit, help="Storyboard unit number or fractional supplement label")
     parser.add_argument("--reference", action="append", help="Local PNG/JPEG/WEBP reference; repeat in mount order (1-9)")
     parser.add_argument("--model")
     parser.add_argument("--duration", type=int)

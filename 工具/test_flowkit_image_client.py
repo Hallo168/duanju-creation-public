@@ -138,7 +138,7 @@ class UnifiedRoutingTests(unittest.TestCase):
             plan = root / 'tasks.json'
             output_name = 'R1-彩铅参考图.png' if provider is None else 'R1-pencil.png'
             plan.write_text(json.dumps({'output_dir':str(root/'out'), 'tasks':[{'id':'R1P','file':output_name,'provider':provider,'refs':[str(source)],'size':'9:16'}]}), encoding='utf-8')
-            config = {'providers': {'flowkit_banana2': {'base_url':'http://127.0.0.1:8100','model':'NARWHAL','aspect_ratio':'9:16','image_size':'1K','prompt':PENCIL_PROMPT,'concurrency':1}}}
+            config = {'colored_pencil_defaults': {'provider': 'aihubkit_gemini_image'}, 'providers': {'aihubkit_gemini_image': {'base_url':'https://apimodel.aihubkit.com','api_key':'test-key','model':'gemini-3.1-flash-image-preview','aspect_ratio':'9:16','image_size':'1K','prompt':PENCIL_PROMPT,'concurrency':1}}}
             actual_open = open
             calls=[]
             def fake_open(file,*args,**kwargs):
@@ -148,24 +148,25 @@ class UnifiedRoutingTests(unittest.TestCase):
                 return actual_open(file,*args,**kwargs)
             class Client:
                 def __init__(self,base,**kwargs):calls.append(('init',base,kwargs))
-                def preflight(self,expected=None):calls.append(('preflight',expected))
+                def preflight(self):calls.append(('preflight',))
                 def generate(self,*args):calls.append(('generate',args[0]));return PNG
-            module=types.ModuleType('flowkit_image_client');module.FlowKitImageClient=Client
-            with patch('builtins.open',side_effect=fake_open),patch.dict(sys.modules,{'flowkit_image_client':module}),patch.object(sys,'argv',['gen_grids_multi.py',str(plan),'0']):
+            module=types.ModuleType('aihubkit_image_client');module.AIHubKitImageClient=Client
+            with patch('builtins.open',side_effect=fake_open),patch.dict(sys.modules,{'aihubkit_image_client':module}),patch.object(sys,'argv',['gen_grids_multi.py',str(plan),'0']):
                 try:runpy.run_path(str(Path(__file__).with_name('gen_grids_multi.py')),run_name='__main__')
                 except SystemExit as exc:self.assertEqual(exc.code,0)
             return calls,(root/'out'/output_name).exists()
 
-    def test_new_and_legacy_provider_both_use_flowkit(self):
-        for provider in ['flowkit_banana2','flow2api_banana2',None]:
+    def test_current_pencil_tasks_use_aihubkit(self):
+        for provider in ['aihubkit_gemini_image',None]:
             with self.subTest(provider=provider):
                 calls,exists=self.run_plan(provider,True)
                 self.assertTrue(exists)
-                self.assertEqual(calls[0][1],'http://127.0.0.1:8100')
+                self.assertEqual(calls[0][1],'https://apimodel.aihubkit.com')
+                self.assertEqual(calls[0][2]['model'],'gemini-3.1-flash-image-preview')
                 self.assertEqual(sum(c[0]=='generate' for c in calls),1)
 
     def test_paused_pencil_does_not_probe_or_submit(self):
-        for provider in ['flowkit_banana2','flow2api_banana2',None]:
+        for provider in ['aihubkit_gemini_image',None]:
             calls,exists=self.run_plan(provider,False)
             self.assertEqual(calls,[])
             self.assertFalse(exists)

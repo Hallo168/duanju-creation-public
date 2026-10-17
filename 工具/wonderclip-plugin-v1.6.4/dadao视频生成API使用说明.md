@@ -77,7 +77,7 @@ python 工具/dadao_video_batch.py poll \
 ```
 POST {base_url}/v1/videos
 Content-Type: application/json
-Authorization: Bearer wc-api-9f3e2a7c8b41d6e50f2a4c9b
+Authorization: Bearer <API_KEY>
 
 {
   "model": "wan3.0-video",
@@ -96,7 +96,7 @@ Authorization: Bearer wc-api-9f3e2a7c8b41d6e50f2a4c9b
 
 ```
 GET {base_url}/v1/videos/{task_id}
-Authorization: Bearer wc-api-9f3e2a7c8b41d6e50f2a4c9b
+Authorization: Bearer <API_KEY>
 ```
 
 `status` 取值：`queued` / `processing` / `completed`（`url` 字段=成品直链，阿里云 OSS 签名链接会过期，完成后尽快下载）/ `failed`（`error.message` 给失败原因）。

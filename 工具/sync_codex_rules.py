@@ -16,8 +16,9 @@ import yaml
 
 ROOT = Path(__file__).resolve().parents[1]
 SKILLS = Path.home() / '.codex' / 'skills'
+AGENT_SKILLS = ROOT / '.agents' / 'skills'
 COMMANDS = ('duibiao', 'xuanti', 'erchuang', 'fenxi', 'fupan', 'xigao')
-PRODUCTION = ('zichan', 'fenjing', 'xiufu', 'houqi', 'fengmian', 'daoyan-fenjing')
+PRODUCTION = ('zichan', 'fenjing', 'xiufu', 'houqi', 'fengmian', 'daoyan-fenjing', 'dola-video-check')
 MARKER = '<!-- 正式流程全文 -->\n'
 
 
@@ -63,39 +64,52 @@ def expected_files():
     agents += '上文是项目总规则全文，直接执行，无需再转读 CLAUDE.md 获取同一正文。\n'
     agents += execution_notes()
     files = [(ROOT / 'CLAUDE.md', ROOT / 'AGENTS.md', agents.encode('utf-8'))]
-    for name in COMMANDS + PRODUCTION:
-        source = ROOT / '.claude' / ('commands' if name in COMMANDS else 'skills')
-        source = source / (name + '.md') if name in COMMANDS else source / name / 'SKILL.md'
-        meta, body = split_source(read_text(source))
-        # This source uses its physical location to explain the root. The installed
-        # Codex file is elsewhere, so translate only that location-dependent sentence.
-        if name == 'fenxi':
-            old = '项目根目录是本文件的 `../..`，当前位置为 `<项目根目录>`。'
-            if body.count(old) != 1:
-                raise ValueError('fenxi root sentence changed; review before publishing')
-            body = body.replace(old, f'项目根目录固定为 `{ROOT.as_posix()}`。')
-        header = '---\n' + yaml.safe_dump(
-            {'name': name, 'description': meta['description']},
-            allow_unicode=True, sort_keys=False, width=1000,
-        ) + '---\n\n'
-        notes = '## Codex 执行约定\n\n'
-        notes += f'本文件包含完整正式流程；适用项目为 `{ROOT.as_posix()}`。'
-        notes += '开工完整读取项目 AGENTS.md；本轮已完整读入且未更新时复用。\n'
-        skill_notes = execution_notes()
-        if name == 'daoyan-fenjing':
-            skill_notes = skill_notes.replace(
-                '知识库、生产线总则和跨层契约继续读取项目内同一份文件。',
-                '导演规则、生产线总则与跨层契约读取 .claude/skills/daoyan-fenjing/知识 内独立副本；输入剧情与资产读取指定故事目录。',
-            )
-        notes += skill_notes
-        if meta.get('argument-hint'):
-            notes += '\n参数提示：' + meta['argument-hint'] + '\n'
-        notes += '\n'
-        result = (header + notes + MARKER + body).encode('utf-8')
-        files.append((source, SKILLS / name / 'SKILL.md', result))
-        if name == 'daoyan-fenjing':
-            ui = source.parent / 'agents' / 'openai.yaml'
-            files.append((ui, SKILLS / name / 'agents' / 'openai.yaml', ui.read_bytes()))
+    for skill_root in (SKILLS, AGENT_SKILLS):
+        for name in COMMANDS + PRODUCTION:
+            source = ROOT / '.claude' / ('commands' if name in COMMANDS else 'skills')
+            source = source / (name + '.md') if name in COMMANDS else source / name / 'SKILL.md'
+            meta, body = split_source(read_text(source))
+            # This source uses its physical location to explain the root. The installed
+            # Codex file is elsewhere, so translate only that location-dependent sentence.
+            if name == 'fenxi':
+                old = '项目根目录是本文件的 `../..`，当前位置为 `.`。'
+                if body.count(old) != 1:
+                    raise ValueError('fenxi root sentence changed; review before publishing')
+                body = body.replace(old, f'项目根目录固定为 `{ROOT.as_posix()}`。')
+            header = '---\n' + yaml.safe_dump(
+                {'name': name, 'description': meta['description']},
+                allow_unicode=True, sort_keys=False, width=1000,
+            ) + '---\n\n'
+            notes = '## Codex 执行约定\n\n'
+            notes += f'本文件包含完整正式流程；适用项目为 `{ROOT.as_posix()}`。'
+            notes += '开工完整读取项目 AGENTS.md；本轮已完整读入且未更新时复用。\n'
+            skill_notes = execution_notes()
+            if name == 'daoyan-fenjing':
+                skill_notes = skill_notes.replace(
+                    '知识库、生产线总则和跨层契约继续读取项目内同一份文件。',
+                    f'导演规则、生产线总则与跨层契约读取 .claude/skills/{name}/知识 内独立副本；输入剧情与资产读取指定故事目录。',
+                )
+            notes += skill_notes
+            if meta.get('argument-hint'):
+                notes += '\n参数提示：' + meta['argument-hint'] + '\n'
+            notes += '\n'
+            result = (header + notes + MARKER + body).encode('utf-8')
+            files.append((source, skill_root / name / 'SKILL.md', result))
+            if name in ('daoyan-fenjing', 'dola-video-check'):
+                ui = source.parent / 'agents' / 'openai.yaml'
+                files.append((ui, skill_root / name / 'agents' / 'openai.yaml', ui.read_bytes()))
+            if name == 'dola-video-check':
+                for folder in ('scripts', 'references'):
+                    for resource in sorted((source.parent / folder).rglob('*')):
+                        if resource.is_file() and resource.suffix in ('.py', '.md'):
+                            relative = resource.relative_to(source.parent)
+                            files.append((resource, skill_root / name / relative, resource.read_bytes()))
+    fantui_src = SKILLS / 'video-fantui'
+    if (fantui_src / 'SKILL.md').exists():
+        for resource in sorted(fantui_src.rglob('*')):
+            if resource.is_file() and '__pycache__' not in resource.parts and resource.suffix != '.pyc':
+                relative = resource.relative_to(fantui_src)
+                files.append((resource, AGENT_SKILLS / 'video-fantui' / relative, resource.read_bytes()))
     return files
 
 

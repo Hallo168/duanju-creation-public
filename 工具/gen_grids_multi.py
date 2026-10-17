@@ -1,11 +1,11 @@
 # -*- coding: utf-8 -*-
 # Concurrent image generation with topological layers and fixed task routing.
-# Ordinary assets use chatgpt2api; colored-pencil derivatives use Flow Kit Banana 2
+# Ordinary assets use built-in image generation outside this script; colored-pencil derivatives use AIHubKit Gemini
 # only when the production switch permits them. Failed tasks never switch routes.
 # Usage: python gen_grids_multi.py <task_json> [c2a_cap]
 # c2a_cap defaults to 6; use 0 for colored-pencil-only batches.
-# Preflight ordinary batches against chatgpt2api /v1/models before submission.
-# Enabled colored-pencil batches preflight the Flow Kit extension and pinned project.
+# GPT2API ordinary batches are blocked while the provider is disabled in configuration.
+# Enabled colored-pencil batches preflight the selected AIHubKit model.
 import argparse
 import json, os, re, sys, shutil, base64, uuid, subprocess, time, threading
 import urllib.error, urllib.request
@@ -13,7 +13,7 @@ import hashlib
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
-parser = argparse.ArgumentParser(description="Generate ordinary assets and colored-pencil references on their fixed routes.")
+parser = argparse.ArgumentParser(description="Generate colored-pencil references on AIHubKit; ordinary GPT2API tasks are disabled by configuration.")
 parser.add_argument("task_json")
 parser.add_argument("c2a_cap", type=int, nargs="?", default=6)
 args = parser.parse_args()
@@ -23,8 +23,8 @@ TASK_JSON = args.task_json
 C2A_CAP = args.c2a_cap
 
 TOOLDIR = os.path.dirname(os.path.abspath(__file__))
-FLOWKIT_CLIENT = None
-COLORED_PROVIDERS = {"flowkit_banana2", "flow2api_banana2"}
+PENCIL_CLIENT = None
+COLORED_PROVIDERS = {"aihubkit_gemini_image"}
 
 def colored_pencil_enabled():
     policy_file = os.path.join(os.path.dirname(os.path.abspath(__file__)), "生产开关.json")
@@ -82,12 +82,8 @@ if not colored_pencil_enabled() and not EPISODE_PENCIL_AUTHORIZED:
 with open(os.path.join(TOOLDIR, "api配置.json"), encoding="utf-8") as config_file:
     CONFIG = json.load(config_file)
 C2A = CONFIG.get("providers", {}).get("chatgpt2api")
-FLOWKIT = CONFIG.get("providers", {}).get("flowkit_banana2")
-
-# Explicit caps must never override a provider disabled by the user.
-if C2A_CAP > 0 and C2A and C2A.get("disabled"):
-    print("chatgpt2api disabled in api configuration; stopped without submission")
-    sys.exit(2)
+PENCIL_PROVIDER = CONFIG.get("colored_pencil_defaults", {}).get("provider", "aihubkit_gemini_image")
+PENCIL = CONFIG.get("providers", {}).get(PENCIL_PROVIDER)
 
 TMP    = os.path.join(os.environ["TEMP"], "gridmulti")
 os.makedirs(TMP, exist_ok=True); os.makedirs(OUTDIR, exist_ok=True)
@@ -103,23 +99,27 @@ for _tid, _task in tasks.items():
 FLOW_TASK_IDS = [tid for tid, t in tasks.items() if is_colored_task(t)]
 REGULAR_TASK_IDS = [tid for tid, t in tasks.items() if not is_colored_task(t)]
 
+if REGULAR_TASK_IDS and C2A and C2A.get("disabled"):
+    print("chatgpt2api disabled in api configuration; stopped without submission")
+    sys.exit(2)
+
 if C2A:
     C2A_BASE = C2A["base_url"].rstrip("/")
     C2A_GEN  = C2A_BASE + "/v1/images/generations"
     C2A_EDIT = C2A_BASE + "/v1/images/edits"
 
-if FLOWKIT and FLOW_TASK_IDS:
-    if FLOWKIT.get("disabled"):
-        print("flowkit_banana2 disabled in api configuration; stopped without submission")
+if PENCIL and FLOW_TASK_IDS:
+    if PENCIL.get("disabled"):
+        print("colored-pencil provider disabled in api configuration; stopped without submission")
         sys.exit(2)
-    FLOWKIT_CAP = max(1, int(FLOWKIT.get("concurrency", 1)))
+    PENCIL_CAP = max(1, int(PENCIL.get("concurrency", 1)))
 else:
-    FLOWKIT_CAP = 0
+    PENCIL_CAP = 0
 
-PROVIDERS = [("c2a", C2A_CAP)] if (C2A_CAP > 0 and C2A) else []
-FLOW_PROVIDERS = ([("flowkit_banana2", FLOWKIT_CAP)] if (FLOW_TASK_IDS and FLOWKIT) else [])
-if FLOW_TASK_IDS and not FLOWKIT:
-    print("flowkit_banana2 provider missing"); sys.exit(1)
+PROVIDERS = [("c2a", C2A_CAP)] if (REGULAR_TASK_IDS and C2A_CAP > 0 and C2A) else []
+FLOW_PROVIDERS = ([(PENCIL_PROVIDER, PENCIL_CAP)] if (FLOW_TASK_IDS and PENCIL) else [])
+if FLOW_TASK_IDS and (not PENCIL or PENCIL_PROVIDER != "aihubkit_gemini_image"):
+    print("selected AIHubKit colored-pencil provider missing or unsupported"); sys.exit(1)
 if REGULAR_TASK_IDS and not PROVIDERS:
     print("no general providers enabled"); sys.exit(1)
 ALL_PROVIDERS = PROVIDERS + FLOW_PROVIDERS
@@ -170,17 +170,17 @@ def _openai_image_bytes(resp_path, work):
         return open(o, "rb").read()
     raise RuntimeError("no b64/url")
 
-def preflight_flowkit():
-    global FLOWKIT_CLIENT
-    from flowkit_image_client import FlowKitImageClient
-    client = FlowKitImageClient(
-        FLOWKIT["base_url"], model=FLOWKIT["model"],
-        aspect_ratio=FLOWKIT["aspect_ratio"], image_size=FLOWKIT["image_size"],
-        prompt=FLOWKIT["prompt"],
+def preflight_pencil():
+    global PENCIL_CLIENT
+    from aihubkit_image_client import AIHubKitImageClient
+    client = AIHubKitImageClient(
+        PENCIL["base_url"], api_key=PENCIL["api_key"], model=PENCIL["model"],
+        aspect_ratio=PENCIL["aspect_ratio"], image_size=PENCIL["image_size"],
+        prompt=PENCIL["prompt"],
     )
-    client.preflight(PLAN.get("expected_flow_project_id"))
-    FLOWKIT_CLIENT = client
-    print("Flow Kit: extension connected, pinned project ready (NARWHAL, portrait, 1K)", flush=True)
+    client.preflight()
+    PENCIL_CLIENT = client
+    print("AIHubKit: selected model listed (portrait, 1K); generation is verified only after completion", flush=True)
 
 # ---- provider generators: return image bytes or raise ----
 def gen_c2a(t, work):
@@ -204,24 +204,24 @@ def gen_c2a(t, work):
     subprocess.run(args + ["-o", resp, "--max-time", "600"], capture_output=True)
     return _openai_image_bytes(resp, work)
 
-def gen_flowkit_banana2(t, work):
+def gen_aihubkit_pencil(t, work):
     if not colored_pencil_enabled() and not EPISODE_PENCIL_AUTHORIZED:
         raise RuntimeError("colored-pencil generation temporarily disabled")
     refs = refs_of(t)
     if len(refs) != 1:
-        raise RuntimeError("Flow Kit colored-pencil task requires exactly one source ref")
+        raise RuntimeError("AIHubKit colored-pencil task requires exactly one source ref")
     ref = _resolve(refs[0])
     if not os.path.exists(ref):
         raise RuntimeError("ref missing " + os.path.basename(refs[0]))
     source_hash = hashlib.sha256(Path(ref).read_bytes()).hexdigest()
     identity = os.path.abspath(TASK_JSON) + '\0' + os.path.abspath(OUTDIR) + '\0' + t['file'] + '\0' + source_hash
     operation_prefix = 'pencil-' + hashlib.sha256(identity.encode('utf-8')).hexdigest()[:40]
-    evidence_dir = os.path.join(TOOLDIR, '运行垃圾', 'tasks', 'flowkit-images', operation_prefix)
-    return FLOWKIT_CLIENT.generate(ref, operation_prefix, evidence_dir)
+    evidence_dir = os.path.join(TOOLDIR, '运行垃圾', 'tasks', 'aihubkit-images', operation_prefix)
+    return PENCIL_CLIENT.generate(ref, operation_prefix, evidence_dir)
 
 GENERATORS = {
     "c2a": gen_c2a,
-    "flowkit_banana2": gen_flowkit_banana2,
+    "aihubkit_gemini_image": gen_aihubkit_pencil,
 }
 
 # ---- topological layers from refs deps ----
@@ -248,7 +248,7 @@ def run_task(tid, provider):
     outFile = os.path.join(OUTDIR, t["file"])
     if os.path.exists(outFile): return (tid, "SKIP")
     last = ""
-    tries = 1 if provider == "flowkit_banana2" else 6
+    tries = 1 if provider in COLORED_PROVIDERS else 6
     for attempt in range(tries):
         work = os.path.join(TMP, tid + "_" + uuid.uuid4().hex[:6])
         os.makedirs(work, exist_ok=True)
@@ -267,7 +267,7 @@ def run_task(tid, provider):
     return (tid, "FAIL " + last)
 
 if FLOW_TASK_IDS:
-    preflight_flowkit()
+    preflight_pencil()
 print("providers: " + ", ".join("%s(cap%d)" % (n, c) for n, c in ALL_PROVIDERS), flush=True)
 print("layers: " + ", ".join("L%d=%d" % (k, len(v)) for k, v in sorted(layers.items())), flush=True)
 ok = fail = skip = 0
@@ -279,7 +279,7 @@ for lyr in sorted(layers):
         futs = [ex.submit(
             run_task,
             tid,
-            "flowkit_banana2" if is_colored_task(tasks[tid]) else "c2a",
+            PENCIL_PROVIDER if is_colored_task(tasks[tid]) else "c2a",
         ) for tid in ids]
         for f in futs:
             tid, res = f.result()

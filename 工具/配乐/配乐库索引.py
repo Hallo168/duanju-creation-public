@@ -57,7 +57,7 @@ def probe_loudness(path: Path) -> dict:
     result = _run([FFMPEG, "-hide_banner", "-nostats", "-i", path,
                    "-af", "ebur128=framelog=quiet", "-f", "null", "-"])
     text = result.stderr
-    lufs = re.search(r"I:\s*(-?\d+\.?\d*)\s*LUFS", text)
+    lufs = re.search(r"./s*(-?\d+\.?\d*)\s*LUFS", text)
     lra = re.search(r"LRA:\s*(-?\d+\.?\d*)\s*LU", text)
     return {
         "lufs": float(lufs.group(1)) if lufs else None,

@@ -8,10 +8,10 @@
 $body = @{
   prompt = "保持主体与构图，派生成中国水墨工笔插画，宣纸纹理，高细节，不添加文字"
   project_id = "e890840e-c2ff-4705-a82f-f15d804e9872"
-  reference_path = "F:\素材\参考图.png"
+  reference_path = "./素材\参考图.png"
   wait = $true
   timeout = 600
-  out = "F:\素材\派生结果.jpg"
+  out = "./素材\派生结果.jpg"
 } | ConvertTo-Json
 
 Invoke-RestMethod `
@@ -31,7 +31,7 @@ Invoke-RestMethod `
 {
   "prompt": "派生成水墨风格",
   "project_id": "e890840e-c2ff-4705-a82f-f15d804e9872",
-  "reference_path": "F:\\素材\\参考图.png",
+  "reference_path": "./素材\\参考图.png",
   "prepare_only": true,
   "wait": false
 }
@@ -42,7 +42,7 @@ Invoke-RestMethod `
 ```powershell
 $body = @{
   project_id = "e890840e-c2ff-4705-a82f-f15d804e9872"
-  out = "F:\素材\结果.jpg"
+  out = "./素材\结果.jpg"
   timeout = 120
 } | ConvertTo-Json
 
