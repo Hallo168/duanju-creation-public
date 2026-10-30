@@ -1,0 +1,16 @@
+{
+    "app_version": "9.9.0",
+    "bALG_BACH_CONFIG": true,
+    "effect": {
+        "Link": [
+            {
+                "scriptPath": "js/template/template.js",
+                "type": "ScriptInfoSticker",
+                "zorder": 8010
+            }
+        ]
+    },
+    "name": "lv_plugin_com.lv.template_gray-filter",
+    "script_version": "1.0.0",
+    "version": "17.6.0"
+}

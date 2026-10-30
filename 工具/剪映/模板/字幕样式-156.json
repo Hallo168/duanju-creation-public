@@ -1,0 +1,99 @@
+{
+  "source_draft": "156-锁门相亲局",
+  "saved_date": "2026-10-18",
+  "scope": "后续houqi对白字幕默认样式",
+  "source_subtitle_count": 365,
+  "verified_style_count": 365,
+  "material_style": {
+    "background_color": "#000000",
+    "border_color": "#000000",
+    "border_width": 0.08,
+    "font_path": "./工具/剪映/模板/字幕-资源/猫啃网烟波宋-B.ttf",
+    "font_resource_id": "7068531367386026526",
+    "font_size": 13,
+    "initial_scale": 1,
+    "line_spacing": 0.02,
+    "shadow_alpha": 0.9,
+    "shadow_angle": -45,
+    "shadow_distance": 5,
+    "shadow_point": {
+      "x": 0.6363961030678928,
+      "y": -0.6363961030678928
+    },
+    "shadow_smoothing": 0.45,
+    "text_color": "#ffffff",
+    "font_title": "烟波宋",
+    "font_category_id": "favoured",
+    "font_category_name": "我的收藏",
+    "font_source_platform": 1
+  },
+  "content_style": {
+    "styles": [
+      {
+        "fill": {
+          "alpha": 1,
+          "content": {
+            "render_type": "solid",
+            "solid": {
+              "alpha": 1,
+              "color": [
+                1,
+                1,
+                1
+              ]
+            }
+          }
+        },
+        "font": {
+          "id": "7068531367386026526",
+          "path": "./工具/剪映/模板/字幕-资源/猫啃网烟波宋-B.ttf"
+        },
+        "size": 13,
+        "strokes": [
+          {
+            "alpha": 1,
+            "content": {
+              "render_type": "solid",
+              "solid": {
+                "alpha": 1,
+                "color": [
+                  0,
+                  0,
+                  0
+                ]
+              }
+            },
+            "width": 0.07999999821186066
+          }
+        ],
+        "useLetterColor": true
+      }
+    ]
+  },
+  "segment_style": {
+    "clip": {
+      "flip": {},
+      "scale": {
+        "x": 1,
+        "y": 1
+      },
+      "transform": {
+        "x": 0,
+        "y": -0.56
+      }
+    },
+    "uniform_scale": {}
+  },
+  "fonts": [
+    {
+      "resource_id": "7068531367386026526",
+      "category_id": "favoured",
+      "category_name": "我的收藏",
+      "source_platform": 1,
+      "path": "./工具/剪映/模板/字幕-资源/猫啃网烟波宋-B.ttf",
+      "effect_id": "7068531367386026526",
+      "title": "烟波宋"
+    }
+  ],
+  "animation": "无入场、出场或循环动画"
+}

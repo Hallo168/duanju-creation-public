@@ -3,12 +3,12 @@
   "updated_at": "2026-10-17",
   "source_commit": "ef860cbde5bdb83c06f4bfe8ec8ea893405c3c4b",
   "source_working_changes_included": true,
-  "selected_files": 3705,
+  "selected_files": 3820,
   "selected_by_top_level": {
     ".claude": 56,
     "产品图": 31,
     "对标素材库": 402,
-    "工具": 91,
+    "工具": 137,
     ".gitignore": 1,
     "AGENTS.md": 1,
     "CLAUDE.md": 1,
@@ -36,7 +36,7 @@
     "规则变更日志.md": 1,
     "规范整理-拍板清单.md": 1,
     "跨层契约.md": 1,
-    "配乐库": 2,
+    "配乐库": 71,
     "金标准样例": 4
   },
   "excluded": [
@@ -92,6 +92,25 @@
         "yaml": "Skill metadata and agents/openai.yaml parsed.",
         "privacy": "Changed/new exported text passed credential-token, credential-assignment, email, URL-credential and local-path scans.",
         "unrelated_scope": "Other project files and private Git history were not imported."
+      }
+    },
+    {
+      "updated_at": "2026-10-30",
+      "scope": "Complete houqi Skill, postproduction tools, templates, fonts and all indexed music/SFX",
+      "source_commit": "76473de803c2c7acb3316797674a06ca5e9741b0",
+      "source_working_changes_included": false,
+      "audio_files": 69,
+      "binary_resource_files": 83,
+      "portability": "Relative template resources resolve before draft writeback, including embedded JSON font paths; FFmpeg/FFprobe may be found on PATH.",
+      "preserved": "Existing local user configuration, public project history and unrelated workflow snapshots",
+      "excluded": "User drafts, backup templates, local configuration, source font-cache path and unrelated media",
+      "validation": {
+        "python_syntax": "passed",
+        "json_parse": "passed",
+        "privacy_scan": "passed",
+        "resource_hashes": "All 83 binary resources match source SHA-256; all 69 indexed audio assets are present",
+        "regression": "7 tests passed against source; 7 tests passed against the initialized public copy, including subtitle preservation, relocated fonts, character-card dependencies and same-track audio replacement",
+        "whitespace": "Project changes passed; original vendor Lua whitespace retained"
       }
     }
   ]

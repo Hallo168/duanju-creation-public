@@ -1,0 +1,11 @@
+{
+    "date": "2025-12-26 12:46:52 +0800",
+    "author": "root",
+    "source": "bugfix/ninghualong/architecture_revamp_2060_bugfix",
+    "branch": "release/20.6.0",
+    "commit": {
+        "id": "09b8436c25dd2c1f2b76fb5756f3c39b064f4edf",
+        "message": "Merge remote-tracking branch 'origin/release/20.6.0' into bugfix/ninghualong/architecture_revamp_2060_bugfix"
+    },
+    "buildingTime": "2025-12-26 12:52:05"
+}

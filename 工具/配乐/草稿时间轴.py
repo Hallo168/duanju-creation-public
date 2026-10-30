@@ -75,28 +75,35 @@ def parse_fenjing(path: Path) -> tuple[list[dict], dict]:
     summary = {}
     for line in raw.splitlines():
         cells = [cell.strip() for cell in line.split("|")]
-        unit_cell = re.fullmatch(r"U?(\d+(?:\.\d+)?)", cells[1], re.I) if len(cells) >= 9 else None
+        unit_cell = re.match(r"^U?(\d+(?:\.\d+)?)(?:\s|$)", cells[1], re.I) if len(cells) >= 9 else None
         if unit_cell:
             raw_number = unit_cell.group(1)
             number = float(raw_number) if "." in raw_number else int(raw_number)
-            summary[number] = {
-                "秒数预算": cells[3],
-                "情绪终点": cells[5],
-                "衔接": cells[7],
-                "风险": cells[8],
-            }
+            if len(cells) >= 11:
+                summary[number] = {
+                    "秒数预算": cells[3],
+                    "情绪终点": cells[6],
+                    "衔接": cells[8],
+                    "风险": cells[9],
+                }
+            else:
+                summary[number] = {
+                    "秒数预算": cells[3],
+                    "情绪终点": cells[5],
+                    "衔接": cells[7],
+                    "风险": cells[8],
+                }
 
     units = []
     for match in re.finditer(r"^##\s*单元(\d+(?:\.\d+)?)[^\n]*\n(.*?)(?=^##\s|\Z)", raw, re.S | re.M):
         raw_number = match.group(1)
         number = float(raw_number) if "." in raw_number else int(raw_number)
         block = match.group(2)
-        # 兼容两代分镜台词格式：旧版 {台词}；新版逐镜 bullet
-        # 「- 角色（声线说明）“台词”」。新版只取行首说话人 bullet，
-        # 避免误收主体定义、约束句等正文里的引号内容。
+        # 兼容三代分镜台词格式：旧版 {台词}；新版逐镜 bullet
+        # 「- 角色（声线说明）“台词”」；导演分镜万相版「角色说道，…：“台词”」。
         lines = re.findall(r"^\s*-\s*[^\n“]+）“([^”]*)”\s*$", block, re.M)
         if not lines:
-            lines = re.findall(r'^[^\n“"：:]+(?:说道|回答|喊道|叫道|问道|喝道|反问|继续说)[：:]\s*[“"]([^”"]*)[”"]\s*$', block, re.M)
+            lines = re.findall(r'(?:[一-龥]{1,6}道|说道|回答|喊道|叫道|问道|喝道|反问|继续说)[^\n：:]*[：:]\s*[“"]([^”"]*)[”"]', block)
         if not lines:
             lines = re.findall(r"\{([^{}]*)\}", block)
         units.append(

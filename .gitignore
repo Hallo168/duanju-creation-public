@@ -59,3 +59,9 @@ stories/*
 *.sqlite*
 *.db
 *.xlsx
+
+# Bundled houqi music, sound effects and template images
+!配乐库/**/*.mp3
+!配乐库/**/*.wav
+!工具/剪映/模板/人物介绍-资源/**/*.png
+!工具/剪映/模板/人物介绍-资源/**/*.jpg

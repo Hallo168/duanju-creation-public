@@ -1,0 +1,347 @@
+{
+  "source_draft": "145-假扮男友",
+  "source_text": [
+    "小周",
+    "傅明的助理"
+  ],
+  "duration_us": 3000000,
+  "track": {
+    "id": "2A8B6388-9C5F-48A4-B1FB-A1450E820FCF",
+    "type": "text",
+    "name": "人物首次出场介绍"
+  },
+  "segment": {
+    "id": "D7F0EA5B-E2BB-472B-8174-40B16792C55E",
+    "target_timerange": {
+      "start": 800000,
+      "duration": 3000000
+    },
+    "render_timerange": {},
+    "clip": {
+      "scale": {
+        "x": 1.0,
+        "y": 1.0
+      },
+      "transform": {
+        "x": 0.0,
+        "y": 0.0
+      },
+      "flip": {}
+    },
+    "uniform_scale": {},
+    "material_id": "F1E840C3-4E03-495E-B369-BD1256E0A355",
+    "extra_material_refs": [
+      "2B8938DA-EFF7-4512-92B0-ECAD6745700E",
+      "13AEDC9B-5D66-4D80-98E0-15285A32B043",
+      "24E4C0B4-E78E-4D24-B6CB-4016955A07D4"
+    ],
+    "render_index": 14000,
+    "enable_lut": false,
+    "enable_adjust": false,
+    "enable_hsl": false,
+    "track_render_index": 5,
+    "responsive_layout": {},
+    "enable_adjust_mask": false,
+    "source": "segmentsourcenormal"
+  },
+  "materials": {
+    "material_animations": [
+      {
+        "id": "24E4C0B4-E78E-4D24-B6CB-4016955A07D4",
+        "type": "sticker_animation",
+        "animations": [
+          {
+            "id": "",
+            "type": "in",
+            "duration": 500000,
+            "path": "./工具/剪映/模板/人物介绍-资源/effect/7426684759327165731/d6da10e0b9cd467873cdeb17ae281ebf",
+            "resource_id": "7426684759327165731",
+            "source_platform": 1,
+            "material_type": "sticker"
+          }
+        ]
+      },
+      {
+        "id": "13AEDC9B-5D66-4D80-98E0-15285A32B043",
+        "type": "sticker_animation",
+        "animations": [
+          {
+            "id": "",
+            "type": "in",
+            "duration": 500000,
+            "path": "./工具/剪映/模板/人物介绍-资源/effect/7163514502128865823/a7b05a11c6bdc7010cc4dc7f1d276407",
+            "resource_id": "7163514502128865823",
+            "source_platform": 1,
+            "material_type": "sticker"
+          }
+        ]
+      },
+      {
+        "id": "2B8938DA-EFF7-4512-92B0-ECAD6745700E",
+        "type": "sticker_animation",
+        "animations": [
+          {
+            "id": "",
+            "type": "in",
+            "duration": 500000,
+            "path": "./工具/剪映/模板/人物介绍-资源/effect/7163514358935327268/3786ff3fcc9795eead5fd5629ff7e4e9",
+            "resource_id": "7163514358935327268",
+            "source_platform": 1,
+            "material_type": "sticker"
+          }
+        ]
+      }
+    ],
+    "text_templates": [
+      {
+        "id": "F1E840C3-4E03-495E-B369-BD1256E0A355",
+        "version": "1.0.0",
+        "effect_id": "7596976658595187992",
+        "resource_id": "7596976658595187992",
+        "name": "人物介绍",
+        "type": "text_template",
+        "path": "./工具/剪映/模板/人物介绍-资源/artistEffect/7596976658595187992/8aba7be9f1cf7f287431a1ede2b6450e",
+        "category_id": "5914740",
+        "category_name": "📇人物名片",
+        "source_platform": 1,
+        "resources": [
+          {
+            "panel": "fonts",
+            "path": "./工具/剪映/模板/人物介绍-资源/effect/7203638484752405051/7e024261e2d38e87bc78e6843ad2e6b3/喜鹊聚珍体.ttf",
+            "resource_id": "7203638484752405051",
+            "source_platform": 1
+          },
+          {
+            "panel": "text",
+            "path": "./工具/剪映/模板/人物介绍-资源/effect/7163514502128865823/a7b05a11c6bdc7010cc4dc7f1d276407",
+            "resource_id": "7163514502128865823",
+            "source_platform": 1
+          },
+          {
+            "panel": "default",
+            "path": "./工具/剪映/模板/人物介绍-资源/artistEffect/7264929366142881059/82cb9d5e1bcc03a8d056438482efd6d1",
+            "resource_id": "7264929366142881059",
+            "source_platform": 1
+          },
+          {
+            "panel": "sticker",
+            "path": "./工具/剪映/模板/人物介绍-资源/effect/7426684759327165731/d6da10e0b9cd467873cdeb17ae281ebf",
+            "resource_id": "7426684759327165731",
+            "source_platform": 1
+          },
+          {
+            "panel": "fonts",
+            "path": "./工具/剪映/模板/人物介绍-资源/effect/7438524730103042599/3dc2297c2b116a9da29a5cb0ab3d894d/优设书华体.ttf",
+            "resource_id": "7438524730103042599",
+            "source_platform": 1
+          },
+          {
+            "panel": "text",
+            "path": "./工具/剪映/模板/人物介绍-资源/effect/7163514358935327268/3786ff3fcc9795eead5fd5629ff7e4e9",
+            "resource_id": "7163514358935327268",
+            "source_platform": 1
+          },
+          {
+            "panel": "flower",
+            "path": "./工具/剪映/模板/人物介绍-资源/artistEffect/7597020679313296664/a7c908fc4dcd82baeb685bd9590e7072",
+            "resource_id": "7597020679313296664",
+            "source_platform": 1
+          }
+        ],
+        "text_info_resources": [
+          {
+            "id": "E99BCAB2-694E-4097-B5D7-3F9C71411457",
+            "attach_info": {
+              "duration": 3000000,
+              "original_size_width": 277.3260192871094,
+              "original_size_height": 179.74832153320312,
+              "clip": {
+                "scale": {
+                  "x": 0.9999998807907104,
+                  "y": 0.999999463558197
+                },
+                "transform": {
+                  "x": 0.0,
+                  "y": 14.513557434082031
+                },
+                "flip": {}
+              }
+            },
+            "text_material_id": "31CE4B75-AB8B-4D92-BD57-C72EED36F154",
+            "extra_material_refs": [
+              "2B8938DA-EFF7-4512-92B0-ECAD6745700E"
+            ]
+          },
+          {
+            "id": "5D6A78D3-41B5-4460-9E59-547F931FF960",
+            "attach_info": {
+              "duration": 3000000,
+              "original_size_width": 220.00001525878903,
+              "original_size_height": 64.16666412353516,
+              "clip": {
+                "scale": {
+                  "x": 1.0000004768371582,
+                  "y": 1.0000003576278689
+                },
+                "transform": {
+                  "x": 0.0,
+                  "y": -91.86121368408205
+                },
+                "flip": {}
+              }
+            },
+            "text_material_id": "01205C93-F469-4A1E-9A61-093DFC37D65B",
+            "extra_material_refs": [
+              "13AEDC9B-5D66-4D80-98E0-15285A32B043"
+            ]
+          }
+        ],
+        "non_text_info_resources": [
+          {
+            "name": "EAECA997-D14B-43B2-B565-55BF414848D4",
+            "type": "sticker",
+            "attach_info": {
+              "start_time": 200000,
+              "duration": 2800000,
+              "original_size_width": 540.0,
+              "original_size_height": 304.0,
+              "clip": {
+                "scale": {
+                  "x": 1.1886298656463623,
+                  "y": 1.0
+                },
+                "transform": {
+                  "x": 0.0,
+                  "y": -51.658878326416016
+                },
+                "flip": {}
+              }
+            },
+            "shape_param": {},
+            "extra_material_refs": [
+              "24E4C0B4-E78E-4D24-B6CB-4016955A07D4"
+            ]
+          }
+        ],
+        "aigc_config": {
+          "font_item": {
+            "id": "3AD4A9C6-2E53-47E5-8B6D-DCD057EF66BC",
+            "resource_id": "",
+            "path": ""
+          }
+        },
+        "request_id": "202610141723475EDF457439ACA22DFAED",
+        "origin_word_info": {},
+        "current_word_info": {},
+        "preview_time": 0.1,
+        "ai_generate_task_info": {
+          "resource_id": "",
+          "path": ""
+        }
+      }
+    ],
+    "texts": [
+      {
+        "id": "01205C93-F469-4A1E-9A61-093DFC37D65B",
+        "name": "C1DACC2C-A5D1-4F95-B427-2D5A3C8AA7ED",
+        "type": "text",
+        "content": "{\"text\":\"傅明的助理\",\"styles\":[{\"fill\":{\"content\":{\"render_type\":\"solid\",\"solid\":{\"color\":[1,1,1]}}},\"font\":{\"path\":\"./工具/剪映/模板/人物介绍-资源/effect/7130644288047682085/06458c13377d445fe3368cd2c786c7a5/Aa研宋.ttf\",\"id\":\"7130644288047682085\"},\"strokes\":[{\"content\":{\"render_type\":\"solid\",\"solid\":{\"color\":[0,0,0]}},\"width\":0.079999998211860657,\"mode\":0}],\"size\":11,\"range\":[0,5]}]}",
+        "words": {},
+        "current_words": {},
+        "combo_info": {},
+        "caption_template_info": {
+          "resource_id": "",
+          "path": ""
+        },
+        "layer_weight": 1,
+        "line_spacing": 0.02,
+        "shadow_color": "#000000",
+        "shadow_alpha": 0.0,
+        "shadow_smoothing": 0.99,
+        "shadow_distance": 8.0,
+        "shadow_point": {
+          "x": 1.0182337649086284,
+          "y": -1.0182337649086284
+        },
+        "shadow_angle": -45.0,
+        "border_alpha": 0.0,
+        "border_color": "#000000",
+        "border_width": 0.07999999821186066,
+        "style_name": "白字黑边",
+        "text_color": "#ffffff",
+        "font_path": "./工具/剪映/模板/人物介绍-资源/effect/7130644288047682085/06458c13377d445fe3368cd2c786c7a5/Aa研宋.ttf",
+        "font_resource_id": "7130644288047682085",
+        "initial_scale": 1.0,
+        "use_effect_default_color": false,
+        "bold_width": 0.008,
+        "italic_degree": 10,
+        "check_flag": 15,
+        "fonts": [
+          {
+            "id": "4A082313-7496-4cf5-BE8B-C8BDF35A3228",
+            "resource_id": "7130644288047682085",
+            "source_platform": 1,
+            "path": "./工具/剪映/模板/人物介绍-资源/effect/7130644288047682085/06458c13377d445fe3368cd2c786c7a5/Aa研宋.ttf",
+            "effect_id": "7130644288047682085",
+            "title": "研宋体"
+          }
+        ],
+        "lyrics_template": {
+          "resource_id": "",
+          "path": ""
+        }
+      },
+      {
+        "id": "31CE4B75-AB8B-4D92-BD57-C72EED36F154",
+        "name": "E516CE90-F5A6-400E-9A0C-40BF7082E8E3",
+        "type": "text",
+        "content": "{\"text\":\"小周\",\"styles\":[{\"fill\":{\"content\":{\"render_type\":\"solid\",\"solid\":{\"color\":[1,0.87058800458908081,0]}}},\"font\":{\"path\":\"./工具/剪映/模板/人物介绍-资源/effect/7130644288047682085/06458c13377d445fe3368cd2c786c7a5/Aa研宋.ttf\",\"id\":\"7130644288047682085\"},\"strokes\":[{\"content\":{\"render_type\":\"solid\",\"solid\":{\"color\":[0,0,0]}},\"width\":0.079999998211860657,\"mode\":0}],\"size\":30.813999176025391,\"shadows\":[{\"thickness_projection_angle\":-45,\"thickness_projection_enable\":false,\"alpha\":0,\"distance\":8.0000648498535156,\"content\":{\"render_type\":\"solid\",\"solid\":{\"color\":[0,0,0]}},\"feather\":0.054999999701976776,\"angle\":-45,\"thickness_projection_distance\":0}],\"range\":[0,2]}]}",
+        "words": {},
+        "current_words": {},
+        "combo_info": {},
+        "caption_template_info": {
+          "resource_id": "",
+          "path": ""
+        },
+        "layer_weight": 1,
+        "line_spacing": 0.02,
+        "has_shadow": true,
+        "shadow_color": "#000000",
+        "shadow_alpha": 0.0,
+        "shadow_smoothing": 0.99,
+        "shadow_distance": 8.0,
+        "shadow_point": {
+          "x": 1.0182337649086284,
+          "y": -1.0182337649086284
+        },
+        "shadow_angle": -45.0,
+        "border_alpha": 0.0,
+        "border_color": "#000000",
+        "border_width": 0.07999999821186066,
+        "style_name": "黄字黑边",
+        "text_color": "#ffde00",
+        "font_path": "./工具/剪映/模板/人物介绍-资源/effect/7130644288047682085/06458c13377d445fe3368cd2c786c7a5/Aa研宋.ttf",
+        "font_resource_id": "7130644288047682085",
+        "initial_scale": 1.0,
+        "use_effect_default_color": false,
+        "bold_width": 0.008,
+        "italic_degree": 10,
+        "check_flag": 47,
+        "fonts": [
+          {
+            "id": "0F224CC0-EFC2-4576-A5EC-FD93355CFE9D",
+            "resource_id": "7130644288047682085",
+            "source_platform": 1,
+            "path": "./工具/剪映/模板/人物介绍-资源/effect/7130644288047682085/06458c13377d445fe3368cd2c786c7a5/Aa研宋.ttf",
+            "effect_id": "7130644288047682085",
+            "title": "研宋体"
+          }
+        ],
+        "lyrics_template": {
+          "resource_id": "",
+          "path": ""
+        }
+      }
+    ]
+  }
+}

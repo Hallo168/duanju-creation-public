@@ -10,7 +10,7 @@
 中间对白连续铺乐；`"类型": "静默"`（可无曲目）仅用于M4片尾静默收，放在末条：
 
 {
-  "草稿": "./JianyingPro Drafts/21-还有口气",
+  "草稿": "<草稿根目录>/21-还有口气",
   "时间轴": "工具/运行垃圾/tasks/21/时间轴.json",
   "对白音频": "./stories/21-还有口气/21-还有口气.mp4",
   "输出目录": "工具/运行垃圾/tasks/21",
@@ -86,7 +86,7 @@ def measure_window(audio: Path, start: float, duration: float) -> float | None:
     text = _run([FFMPEG, "-hide_banner", "-nostats", "-ss", f"{start:.3f}",
                  "-t", f"{max(duration, 1.0):.3f}", "-i", audio,
                  "-af", "ebur128=framelog=quiet", "-f", "null", "-"])
-    match = re.search(r"./s*(-?\d+\.?\d*)\s*LUFS", text)
+    match = re.search(r"I:\s*(-?\d+\.?\d*)\s*LUFS", text)
     return float(match.group(1)) if match else None
 
 

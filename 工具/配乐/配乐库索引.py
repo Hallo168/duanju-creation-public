@@ -15,6 +15,7 @@ import io
 import json
 import os
 import re
+import shutil
 import subprocess
 import sys
 from pathlib import Path
@@ -57,7 +58,7 @@ def probe_loudness(path: Path) -> dict:
     result = _run([FFMPEG, "-hide_banner", "-nostats", "-i", path,
                    "-af", "ebur128=framelog=quiet", "-f", "null", "-"])
     text = result.stderr
-    lufs = re.search(r"./s*(-?\d+\.?\d*)\s*LUFS", text)
+    lufs = re.search(r"I:\s*(-?\d+\.?\d*)\s*LUFS", text)
     lra = re.search(r"LRA:\s*(-?\d+\.?\d*)\s*LU", text)
     return {
         "lufs": float(lufs.group(1)) if lufs else None,
@@ -85,7 +86,7 @@ def probe_head_silence(path: Path) -> float:
 
 
 def scan(only: str | None = None) -> dict:
-    if not FFMPEG.exists() or not FFPROBE.exists():
+    if not (FFMPEG.is_file() or shutil.which(str(FFMPEG))) or not (FFPROBE.is_file() or shutil.which(str(FFPROBE))):
         sys.exit(f"找不到 ffmpeg/ffprobe：{FFMPEG} / {FFPROBE}")
 
     previous = {}

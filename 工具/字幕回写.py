@@ -16,17 +16,20 @@
 - 备份到 `草稿目录/.backup/字幕回写前_时间戳/`（保留每一次，不再互相覆盖）
 - 同步改 content 与 base_content 的 text，styles[].range 同步为 [0, 新文本长度]
 - recognize_text（识别原始记录）保留不动
+- 默认沿用 工具/剪映/模板/字幕样式-156.json 的显示参数，仅作用于对白字幕
 """
+import copy
 import io
 import json
 import shutil
 import sys
+import uuid
 from datetime import datetime
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).resolve().parent / "剪映"))
 from 环境 import (  # noqa: E402
-    找草稿, 读草稿JSON, 写草稿JSON, 草稿文件, 是加密草稿, 用UTF8输出,
+    找草稿, 读草稿JSON, 写草稿JSON, 草稿文件, 是加密草稿, 用UTF8输出, 展开模板资源,
 )
 sys.path.insert(0, str(Path(__file__).resolve().parent))
 from 字幕提取 import 取字幕段  # noqa: E402
@@ -44,7 +47,22 @@ def 读修正(fix_path: str) -> dict[int, str]:
     return corrected
 
 
-def 改一份(data: dict, corrected: dict[int, str]) -> int:
+def 套字幕样式(material: dict, segment: dict, template: dict) -> None:
+    material.update(copy.deepcopy(template["material_style"]))
+    material["fonts"] = [dict(copy.deepcopy(font), id=str(uuid.uuid4()).upper()) for font in template["fonts"]]
+    for key in ("content", "base_content"):
+        if not material.get(key):
+            continue
+        content = json.loads(material[key])
+        text = content.get("text", "")
+        content.update(copy.deepcopy(template["content_style"]))
+        for style in content.get("styles", []):
+            style["range"] = [0, len(text)]
+        material[key] = json.dumps(content, ensure_ascii=False, separators=(",", ":"))
+    segment.update(copy.deepcopy(template["segment_style"]))
+
+
+def 改一份(data: dict, corrected: dict[int, str], style_template: dict | None = None) -> int:
     # 新版剪映的根工程文件可能不含 texts，字幕只在主时间线文件中。
     # 这种工程壳无需修改，也不能拿它做条数校验。
     raw_texts = data.get("materials", {}).get("texts", [])
@@ -59,6 +77,8 @@ def 改一份(data: dict, corrected: dict[int, str]) -> int:
     for i, s in enumerate(segs):
         tm = texts[s["material_id"]]
         new_text = corrected[i]
+        if style_template is not None:
+            套字幕样式(tm, s, style_template)
         try:
             old_text = json.loads(tm["content"]).get("text", "")
         except Exception:
@@ -91,6 +111,9 @@ def main():
     draft_dir = 找草稿(sys.argv[1])
     corrected = 读修正(sys.argv[2])
 
+    template_path = Path(__file__).resolve().parent / "剪映" / "模板" / "字幕样式-156.json"
+    style_template = 展开模板资源(json.loads(template_path.read_text(encoding="utf-8"))) if template_path.exists() else None
+
     files = 草稿文件(draft_dir)
     加密 = 是加密草稿(draft_dir)
 
@@ -104,13 +127,15 @@ def main():
     总数 = 0
     for path in files:
         data = 读草稿JSON(path)
-        changed = 改一份(data, corrected)
+        changed = 改一份(data, corrected, style_template)
         写草稿JSON(path, data, 加密=加密)
         读草稿JSON(path)          # 回读验证：能解析才算写成功
         总数 = max(总数, changed)
         print("  %-12s 改了 %d 条" % (path.parent.name if path.parent != draft_dir else "根目录", changed))
 
     print("字幕回写完成：%d 条改动 ／ %d 份文件 ／ 格式=%s" % (总数, len(files), "密文" if 加密 else "明文"))
+    if style_template is not None:
+        print("字幕样式已沿用156模板：烟波宋／13号／白字黑描边／Y=-0.56")
     print("备份 → %s" % backup_dir)
 
 

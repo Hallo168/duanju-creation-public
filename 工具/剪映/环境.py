@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """剪映相关脚本的公共入口：路径配置 + 加解密 + 草稿定位。
 
-本项目**不依赖 ./AutoTool 的代码**（2026-07-27 用户裁定要项目独立）。
+本项目**不依赖 <其他项目> 的代码**（2026-07-27 用户裁定要项目独立）。
 所有本机路径集中在同目录的 `剪映配置.json`，换机器只改那一个文件。
 
 用法：
@@ -38,6 +38,27 @@ def ffprobe路径() -> str:
 
 def ffmpeg路径() -> str:
     return str(配置().get("ffmpeg") or "ffmpeg")
+
+
+def 展开模板资源(value):
+    """把分享模板里的项目相对资源路径展开，兼容嵌套的字幕 JSON 字符串。"""
+    if isinstance(value, dict):
+        return {key: 展开模板资源(item) for key, item in value.items()}
+    if isinstance(value, list):
+        return [展开模板资源(item) for item in value]
+    if isinstance(value, str):
+        relative = value.replace("\\", "/").removeprefix("./")
+        if relative.startswith("工具/剪映/模板/"):
+            return (ROOT / relative).as_posix()
+        if value.startswith(("{", "[")):
+            try:
+                content = json.loads(value)
+            except ValueError:
+                return value
+            resolved = 展开模板资源(content)
+            if resolved != content:
+                return json.dumps(resolved, ensure_ascii=False, separators=(",", ":"))
+    return value
 
 
 def 找草稿(名字: str) -> Path:

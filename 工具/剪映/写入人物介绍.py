@@ -3,7 +3,7 @@
 import argparse,copy,json,re,shutil,sys,uuid
 from datetime import datetime
 from pathlib import Path
-from 环境 import ROOT,找草稿,草稿文件,读草稿JSON,写草稿JSON,是加密草稿
+from 环境 import ROOT,找草稿,草稿文件,读草稿JSON,写草稿JSON,是加密草稿,展开模板资源
 UUID_RE=re.compile(r'^[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}$')
 def new_id():return str(uuid.uuid4()).upper()
 def uuid_values(value):
@@ -26,11 +26,29 @@ def text_replace(material,text):
    for style in content.get('styles',[]):style['range']=[0,len(text)]
    material[field]=json.dumps(content,ensure_ascii=False,separators=(',',':'))
 
+def prepare_dependencies(data,draft):
+ for template in data.get('materials',{}).get('text_templates',[]):
+  package=Path(template.get('path',''));depends=package/'depends'
+  if not depends.is_file():continue
+  original=depends.read_text(encoding='utf-8-sig')
+  def resolve(match):
+   value=match.group(2).replace('\\','/')
+   if '/Cache/' in value:value='./工具/剪映/模板/人物介绍-资源/'+value.split('/Cache/',1)[1]
+   resolved=展开模板资源(value)
+   if resolved!=value and not Path(resolved).exists():raise FileNotFoundError(resolved)
+   return match.group(1)+resolved
+  updated=re.sub(r'(?m)^(\d+\\path=)([^\r\n]+)',resolve,original)
+  if updated==original:continue
+  target=draft/'.houqi_resources'/package.name
+  shutil.copytree(package,target,dirs_exist_ok=True)
+  (target/'depends').write_text(updated,encoding='utf-8')
+  template['path']=target.as_posix()
+
 def main():
  ap=argparse.ArgumentParser();ap.add_argument('plan');ap.add_argument('--dry-run',action='store_true');args=ap.parse_args()
  spec=json.loads(Path(args.plan).read_text(encoding='utf-8-sig'))
  tp=Path(spec['template']);tp=tp if tp.is_absolute() else ROOT/tp
- template=json.loads(tp.read_text(encoding='utf-8-sig'))
+ template=展开模板资源(json.loads(tp.read_text(encoding='utf-8-sig')))
  for resource in template['materials']['text_templates'][0].get('resources',[]):
   if resource.get('path') and not Path(resource['path']).exists():raise FileNotFoundError(resource['path'])
  draft=找草稿(spec['draft']);paths=草稿文件(draft);encrypted=是加密草稿(draft)
@@ -52,6 +70,7 @@ def main():
   data['tracks'].append(track);outputs.append((file,data))
  result={'draft':str(draft),'dry_run':args.dry_run,'encrypted_draft':encrypted,'track_name':spec['track_name'],'card_count':len(spec['characters']),'duration_s':template['duration_us']/1e6,'characters':spec['characters'],'content_files':[str(p) for p in paths]}
  if not args.dry_run:
+  for file,data in outputs:prepare_dependencies(data,draft)
   backup=draft/'.backup'/('人物介绍前_'+datetime.now().strftime('%Y%m%d_%H%M%S_%f'))
   for file in paths:
    dest=backup/file.relative_to(draft);dest.parent.mkdir(parents=True,exist_ok=True);shutil.copy2(file,dest)
