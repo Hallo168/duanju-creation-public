@@ -3,9 +3,9 @@
   "updated_at": "2026-10-17",
   "source_commit": "ef860cbde5bdb83c06f4bfe8ec8ea893405c3c4b",
   "source_working_changes_included": true,
-  "selected_files": 3696,
+  "selected_files": 3705,
   "selected_by_top_level": {
-    ".claude": 47,
+    ".claude": 56,
     "产品图": 31,
     "对标素材库": 402,
     "工具": 91,
@@ -66,5 +66,33 @@
     "privacy_scan": "changed and new files passed token, email, local path and known credential checks; inherited third-party test and documentation examples preserved",
     "workbench_and_vendored_code": "preserved unchanged from 2026-09-11; tests not rerun",
     "git_history": "existing public history retained; this update removes hardcoded plugin credentials from the current snapshot"
-  }
+  },
+  "incremental_updates": [
+    {
+      "updated_at": "2026-10-30",
+      "scope": ".claude/skills/daoyan-fenjing/",
+      "version": "20261029-v6",
+      "source_commit": "0468a0cfef6b431d87e2b0cb10de8963eed613c4",
+      "source_working_changes_included": false,
+      "skill_files": 25,
+      "new_skill_files": 9,
+      "preserved_public_integration_guides": [
+        ".claude/skills/daoyan-fenjing/知识/视频生成规范-备用通道.md",
+        ".claude/skills/daoyan-fenjing/知识/视频生成规范.md"
+      ],
+      "related_metadata": [
+        "README.md",
+        "规则变更日志.md",
+        "PUBLIC_EXPORT_MANIFEST.json"
+      ],
+      "sanitization": "Project root made relative; account aliases use the existing public-export substitutions; one trailing empty line removed from 表达行为示例.md for the Git whitespace check. The two optional video-generation guides retain the existing public integrations rather than importing private video-delivery Agent dependencies.",
+      "validation": {
+        "source_fidelity": "23 Skill files match source after documented path and alias substitutions and one trailing-empty-line cleanup; 2 optional video-generation guides match the previous public snapshot.",
+        "skill_references": "14 direct knowledge references resolve within the exported Skill.",
+        "yaml": "Skill metadata and agents/openai.yaml parsed.",
+        "privacy": "Changed/new exported text passed credential-token, credential-assignment, email, URL-credential and local-path scans.",
+        "unrelated_scope": "Other project files and private Git history were not imported."
+      }
+    }
+  ]
 }
